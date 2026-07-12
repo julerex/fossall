@@ -9,7 +9,10 @@ A small public site built almost entirely in Rust:
 - **Rust WASM** for the interactive battery-pack estimator on the essay page
 - Deployed on **Fly.io** at [fossall.com](https://fossall.com)
 
-First piece of content: a feasibility sketch of a low-cost, fully electric, fully self-driving recreational vehicle about the size of a shipping container — see `/rv` (interactive Three.js model, solar yield math, Tesla-scale cost estimate, and a comparison to U.S. house prices / apartment rents / Tesla-style leases).
+Content:
+
+- `/rv` — feasibility sketch of a low-cost, fully electric, fully self-driving recreational vehicle about the size of a shipping container (interactive Three.js model, solar yield math, Tesla-scale cost estimate, and a comparison to U.S. house prices / apartment rents / Tesla-style leases)
+- `/homeprices` — why U.S. home prices are still high in July 2026, with a 30-year look at land vs building materials vs labor
 
 ## Local development
 
@@ -23,6 +26,7 @@ cargo install wasm-bindgen-cli --version 0.2.120
 make dev
 # → http://localhost:8080/
 # → http://localhost:8080/rv
+# → http://localhost:8080/homeprices
 ```
 
 Other targets:

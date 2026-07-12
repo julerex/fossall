@@ -22,6 +22,11 @@ pub async fn home() -> impl IntoResponse {
                         "Read: low-cost electric self-driving container RV →"
                     }
                 }
+                p {
+                    a class="btn secondary" href="/homeprices" hx-boost="true" {
+                        "Why home prices are high in 2026 →"
+                    }
+                }
             }
             section class="cards" {
                 article {
@@ -39,6 +44,13 @@ pub async fn home() -> impl IntoResponse {
                         "fully electric and fully self-driving, possible at a low cost? "
                         "The essay sketches constraints, solar yield, and a Tesla-scale "
                         "cost model — not a product brochure."
+                    }
+                }
+                article {
+                    h2 { "Home prices" }
+                    p {
+                        "Why U.S. housing is still expensive in July 2026 — and how land, "
+                        "building materials, and labor costs have diverged over thirty years."
                     }
                 }
             }
@@ -969,6 +981,757 @@ const PACK_ESTIMATOR_BOOTSTRAP: &str = r#"
   }
 </script>
 "#;
+
+/// `GET /homeprices` — why U.S. housing is expensive in July 2026.
+pub async fn homeprices() -> impl IntoResponse {
+    layout::page(
+        "Home prices",
+        html! {
+            article class="essay" {
+                header class="essay-header" {
+                    p class="eyebrow" { "Housing · July 2026 · order-of-magnitude essay" }
+                    h1 { "Why home prices are still so high in July 2026" }
+                    p class="lede" {
+                        "A median U.S. home still costs more than four hundred thousand dollars. "
+                        "Monthly payments on that home are near record highs. The usual culprits "
+                        "— lumber, labor shortages, greedy builders — are real, but they are not "
+                        "the whole story. Over the last thirty years, " strong { "land" } " has "
+                        "done most of the heavy lifting on price, materials and labor have risen "
+                        "roughly in line with (or modestly above) broad inflation, and a stack of "
+                        "demand, finance, and regulation effects keeps the market expensive even "
+                        "when construction costs cool. A suburban Kansas case study later "
+                        "shows how that breakdown plays out where land is not the coastal "
+                        "villain."
+                    }
+                }
+
+                section {
+                    h2 { "1. The July 2026 snapshot" }
+                    p {
+                        "As of mid-2026, national medians for " em { "new" } " and "
+                        em { "existing" } " homes both sit above "
+                        strong { "$400,000" } ". Harvard’s Joint Center for Housing Studies "
+                        "(2026 " em { "State of the Nation’s Housing" } ") notes existing-home "
+                        "prices are up about " strong { "54% since 2020" } " and remain near "
+                        strong { "five times median income" } " — far above the roughly "
+                        "three-times ratio that held for much of the 1990s."
+                    }
+                    p {
+                        "Sticker prices are only half the pain. With mortgage rates still "
+                        "holding " strong { "above 6%" } ", the monthly principal-and-interest "
+                        "payment on a median-priced home was about "
+                        strong { "$3,100 in late 2025" } ", up from roughly "
+                        strong { "$1,700 in early 2020" } ". Affording that payment requires "
+                        "something like a " strong { "$120,000+" } " household income, versus "
+                        "about $66,000 five years earlier."
+                    }
+                    p {
+                        "Listing prices have softened in places — Realtor.com’s May 2026 report "
+                        "showed the national median " em { "listing" } " price down about "
+                        "2.4% year over year to roughly " strong { "$430,000" } ", the steepest "
+                        "annual listing decline in years of their series — but “sellers pricing "
+                        "to sell” is not the same as “housing became cheap.” Payments, down "
+                        "payments, insurance, and property taxes still price a large share of "
+                        "households out."
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Metric" }
+                                    th { "~1995–96" }
+                                    th { "Mid-2026" }
+                                    th { "Rough change" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "Median / typical sale price (national ballpark)" }
+                                    td { "~$110–140k" }
+                                    td { strong { "~$400k+" } }
+                                    td { "~3–3.5× nominal" }
+                                }
+                                tr {
+                                    td { "Price-to-median-income ratio" }
+                                    td { "~3×" }
+                                    td { strong { "~5×" } }
+                                    td { "Affordability worse" }
+                                }
+                                tr {
+                                    td { "30-year mortgage rate (order of magnitude)" }
+                                    td { "~7–8%" }
+                                    td { "~6–7%" }
+                                    td { "Similar band; 2020–21 rates were the anomaly" }
+                                }
+                                tr {
+                                    td { "Monthly P&I on median home" }
+                                    td { "Far lower in real terms" }
+                                    td { strong { "~$3,000+" } }
+                                    td { "Near record high" }
+                                }
+                            }
+                        }
+                    }
+                    p class="callout" {
+                        "Bottom line for July 2026: prices are no longer sprinting higher "
+                        "everywhere, but the " em { "level" } " of price and payment remains "
+                        "historically high relative to incomes. Soft landings do not reset "
+                        "a 50% pandemic-era jump overnight."
+                    }
+                }
+
+                section {
+                    h2 { "2. Decompose the house: land, materials, labor" }
+                    p {
+                        "A house price is not one number. Economists usually split it into "
+                        strong { "structure" } " (the reproducible building — materials, labor, "
+                        "overhead, profit) and " strong { "land" } " (the location, including "
+                        "the right to build there). New homes add a third practical layer: "
+                        strong { "soft costs and regulation" } " (entitlements, impact fees, "
+                        "code-driven design, delay)."
+                    }
+                    p {
+                        "National Association of Home Builders (NAHB) cost surveys of "
+                        em { "new" } " single-family homes show construction hard costs now "
+                        "dominating the " em { "builder sales price" } ":"
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Share of new-home sales price (NAHB, 2024 survey)" }
+                                    th { "Approx. share" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "Construction cost (structure)" }
+                                    td { strong { "~64%" } }
+                                }
+                                tr {
+                                    td { "Finished lot" }
+                                    td { "~14%" }
+                                }
+                                tr {
+                                    td { "Builder profit" }
+                                    td { "~11%" }
+                                }
+                                tr {
+                                    td { "Overhead, marketing, commission, financing" }
+                                    td { "~11%" }
+                                }
+                            }
+                        }
+                    }
+                    p {
+                        "That table is easy to misread. It describes " em { "what builders "
+                        "charge for a newly built house on a finished suburban lot" } ", not "
+                        "what buyers pay for an existing bungalow in San Francisco or Boston. "
+                        "In constrained coastal metros, " strong { "land’s share of total "
+                        "market value is often 50–80%+" } " for existing stock. Nationally, "
+                        "research using FHFA appraisal data puts land’s share of single-family "
+                        "value in the high-30s percent range in the 2010s–early 2020s — and "
+                        "much higher in the densest, richest counties."
+                    }
+                    p {
+                        "So the answer to “why are homes expensive?” depends on " em { "which "
+                        "homes" } ":"
+                    }
+                    ul {
+                        li {
+                            strong { "Expensive metros / scarce lots:" } " mostly land and "
+                            "the right to build (zoning, NIMBY process, limited zoned capacity)."
+                        }
+                        li {
+                            strong { "New construction everywhere:" } " materials + labor + "
+                            "regulation, with lots still expensive where growth is hot."
+                        }
+                        li {
+                            strong { "Existing stock nationally:" } " pandemic demand shock, "
+                            "low inventory, and rate lock-in layered on decades of underbuilding "
+                            "relative to household formation."
+                        }
+                    }
+                }
+
+                section {
+                    h2 { "3. Land over thirty years: the big story" }
+                    p {
+                        "If you only track lumber futures, you miss the main long-run driver. "
+                        "Work by Morris Davis and coauthors (including the classic Davis–Palumbo "
+                        "large-city series and later FHFA/AEI land indicators) shows that "
+                        strong { "residential land values have outpaced structure costs for "
+                        "decades in high-demand places" } "."
+                    }
+                    ul {
+                        li {
+                            "In a sample of large U.S. metros, land's average share of home value "
+                            "rose from about " strong { "32% in 1984" } " to about "
+                            strong { "50% by 2004" } " (Davis & Palumbo). West Coast land shares "
+                            "were already high by the mid-1980s; Midwest shares were still "
+                            "single-digit to low-teens and climbed from a low base."
+                        }
+                        li {
+                            "Aggregating more carefully across the national stock, land has "
+                            "often accounted for roughly " strong { "a third to half" } " of "
+                            "total housing value depending on the year and method — with a clear "
+                            "upward trend in superstar metros."
+                        }
+                        li {
+                            "FHFA research for " strong { "2012-2022" } " finds national land "
+                            "prices rose about " strong { "8% per year" } ", faster than house "
+                            "prices overall, lifting land's national share from about "
+                            strong { "37% to ~40%" } ". Growth was heavily concentrated: a "
+                            "handful of high-value counties (especially California) dominate "
+                            "the aggregate land pile."
+                        }
+                    }
+                    p {
+                        "Why does land run away? " strong { "Supply of desirable locations "
+                        "is almost fixed" } " once you fix commute sheds, school districts, "
+                        "and coastal amenity. When more households want to live in the same "
+                        "places — and local rules block denser redevelopment — the price "
+                        "adjustment happens in " em { "land rents" } ", not in a factory "
+                        "that can mint more “San Francisco half-acres.”"
+                    }
+                    p {
+                        "Regulation is part of the land story even when it shows up as a "
+                        "building cost. NAHB regulation studies put government-imposed costs "
+                        "(lot development requirements, fees, code changes, delay) on the order "
+                        "of " strong { "a quarter of the price of a typical new home" } " in "
+                        "recent years — tens of thousands of dollars that are not lumber or "
+                        "carpenters’ wages, but still show up in the check the buyer writes."
+                    }
+                    p class="callout" {
+                        "Thirty-year takeaway: " strong { "land (and the right to build on it) "
+                        "is the component that can double or triple without a matching "
+                        "physical improvement." } " Materials and labor cannot do that forever; "
+                        "they face competition and substitution. Scarce urban land under tight "
+                        "zoning can."
+                    }
+                }
+
+                section {
+                    h2 { "4. Building materials: up, volatile, not the whole plot" }
+                    p {
+                        "Producer prices for construction materials (BLS special index, "
+                        "1982 = 100) tell a clear but limited story:"
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Construction materials PPI (approx.)" }
+                                    th { "Index (1982 = 100)" }
+                                    th { "Notes" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "Mid-1990s" }
+                                    td { strong { "~140" } }
+                                    td { "Quiet, slow climb" }
+                                }
+                                tr {
+                                    td { "Mid-2000s boom" }
+                                    td { "~170–200" }
+                                    td { "Housing boom demand" }
+                                }
+                                tr {
+                                    td { "2019 (pre-pandemic)" }
+                                    td { "~230–250" }
+                                    td { "Steady inflation era" }
+                                }
+                                tr {
+                                    td { "2021–22 spike" }
+                                    td { "Sharp jump" }
+                                    td { "Lumber, steel, supply chains" }
+                                }
+                                tr {
+                                    td { "May 2026" }
+                                    td { strong { "~363" } }
+                                    td { "Still elevated; tariffs and residual inflation" }
+                                }
+                            }
+                        }
+                    }
+                    p {
+                        "From the mid-1990s to mid-2026 that is roughly a "
+                        strong { "2.5–2.6×" } " nominal increase in materials prices. Over the "
+                        "same window, overall U.S. consumer prices rose on the order of "
+                        strong { "~2×" } ". So materials are "
+                        strong { "modestly more expensive in real terms" } " than thirty years "
+                        "ago — important for builders, not enough alone to explain "
+                        "tripling house prices."
+                    }
+                    p {
+                        "The path mattered more than the trend. Softwood lumber’s 2020–21 "
+                        "blowout (triple-digit year-over-year spikes at the worst) made "
+                        "every framing package a news story. Many inputs partially "
+                        "normalized, then re-accelerated: industry trackers saw construction "
+                        "materials PPI up several percent in 2025 alone, with "
+                        "trade policy on softwood, steel, and aluminum still in the mix in "
+                        "2025–26."
+                    }
+                    p {
+                        "Materials also interact with " em { "size and code" } ". The typical "
+                        "new American house is larger and more heavily specified (HVAC, "
+                        "insulation, electrical, accessibility) than a 1990s starter. Even "
+                        "flat unit prices would yield a more expensive structure. That is "
+                        "quality and regulation, not just “wood got expensive.”"
+                    }
+                }
+
+                section {
+                    h2 { "5. Labor: scarce trades, rising pay, slower productivity" }
+                    p {
+                        "Construction wages have risen sharply in nominal terms. Average "
+                        "hourly earnings for all construction employees were about "
+                        strong { "$41 / hour in mid-2026" } " (BLS). Production and "
+                        "nonsupervisory construction pay sits a bit lower but in the same "
+                        "high-thirties band. In the mid-1990s, comparable construction "
+                        "hourly earnings were roughly in the mid-teens — call it about "
+                        strong { "2.5× over thirty years" } ", similar to materials and only "
+                        "somewhat ahead of general wage growth."
+                    }
+                    p {
+                        "The binding constraint is often " strong { "bodies and skills" } ", "
+                        "not the sticker wage. After the 2008–12 bust, residential construction "
+                        "employment cratered; many workers left for other industries and did "
+                        "not return. Demographic aging, training bottlenecks, and immigration "
+                        "policy all hit a sector that still relies heavily on immigrant labor "
+                        "in many regions. When starts pick up, bid prices for framers, "
+                        "electricians, and plumbers rise faster than average wages because "
+                        "schedules slip and overtime becomes normal."
+                    }
+                    p {
+                        "Residential construction productivity has been notoriously weak "
+                        "compared with manufacturing. Building a house is still a "
+                        "site-specific craft product. Factory-built modules and panelization "
+                        "help at the margin, but most U.S. single-family volume is still "
+                        "stick-built on site. Weak productivity means wage gains pass more "
+                        "fully into structure costs."
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Cost driver (~30-year lens)" }
+                                    th { "Nominal multiple (ballpark)" }
+                                    th { "Vs. general CPI (~2×)" }
+                                    th { "Role in 2026 prices" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { strong { "Land (high-demand metros)" } }
+                                    td { "Often 4–10×+ locally" }
+                                    td { "Far above CPI" }
+                                    td { "Dominant long-run driver of metro gaps" }
+                                }
+                                tr {
+                                    td { strong { "Land (national aggregate)" } }
+                                    td { "Faster than structures since 2010s" }
+                                    td { "Above CPI" }
+                                    td { "Large share of value; concentrated in rich counties" }
+                                }
+                                tr {
+                                    td { strong { "Building materials" } }
+                                    td { "~2.5–2.6×" }
+                                    td { "Modestly above CPI" }
+                                    td { "Raises new-build floors; spike risk remains" }
+                                }
+                                tr {
+                                    td { strong { "Construction labor" } }
+                                    td { "~2.5× hourly" }
+                                    td { "Similar / slightly above wages overall" }
+                                    td { "Scarcity + weak productivity amplify cost" }
+                                }
+                                tr {
+                                    td { strong { "House prices (national)" } }
+                                    td { "~3–3.5×" }
+                                    td { "Well above CPI" }
+                                    td { "Land + finance + shortage, not just BOM" }
+                                }
+                            }
+                        }
+                    }
+                    p class="callout" {
+                        "Materials and labor explain why " em { "building a new house is "
+                        "expensive" } ". They do not fully explain why a 1955 ranch on a "
+                        "coastal lot sells for a million dollars. That is mostly land and "
+                        "scarcity of permission to add more homes."
+                    }
+                }
+
+                section {
+                    h2 { "6. Case study: suburban Kansas over thirty years" }
+                    p {
+                        "National averages hide geography. Suburban Kansas is a useful "
+                        "stress test of the land-vs-structure story because the Midwest has "
+                        "historically been the " em { "elastic, structure-heavy" } " end of "
+                        "American housing — more room to build, lower land shares, and "
+                        "prices that are high by local standards but still far below the "
+                        "coasts."
+                    }
+
+                    h3 { "What a typical house cost then and now" }
+                    p {
+                        "Start with the metro envelope that includes the big Kansas suburbs "
+                        "(Overland Park, Olathe, Shawnee, Lenexa) as well as Kansas City, "
+                        "Missouri. The FHFA all-transactions house price index for the "
+                        "Kansas City, MO-KS metro is rebased to "
+                        strong { "100 in 1995:Q1" } ". By " strong { "2026:Q1 it was about "
+                        "374" } " — roughly a " strong { "3.7×" } " rise in same-property "
+                        "values over about thirty-one years. Wichita’s parallel index sits "
+                        "near " strong { "312" } " (~3.1×), a reminder that even within "
+                        "Kansas the growth rate is not uniform."
+                    }
+                    p {
+                        "Dollar levels, not just indexes:"
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Market" }
+                                    th { "~1995 ballpark" }
+                                    th { "Mid-2026 ballpark" }
+                                    th { "Rough multiple" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "Kansas City metro (existing-home median)" }
+                                    td { strong { "~$90–95k" } " (HUD/NAR-era metro medians)" }
+                                    td { strong { "~$320–345k" } }
+                                    td { "~3.5–3.7× (matches FHFA HPI)" }
+                                }
+                                tr {
+                                    td { "Johnson County / Overland Park–class suburb" }
+                                    td { "~$120–160k typical mid-90s suburban stock" }
+                                    td { strong { "~$485–500k" } " median sale (JoCo / OP, spring 2026)" }
+                                    td { "~3–4× depending on the 1990s anchor" }
+                                }
+                                tr {
+                                    td { "Wichita (urban + suburban mix)" }
+                                    td { "Well under $100k metro median class" }
+                                    td { strong { "~$240–270k" } " sale/list band" }
+                                    td { "~3× (FHFA ~3.1×)" }
+                                }
+                                tr {
+                                    td { "Statewide Kansas median" }
+                                    td { "Below national" }
+                                    td { strong { "~$280k" } }
+                                    td { "Still ~30%+ under U.S. median" }
+                                }
+                                tr {
+                                    td { "U.S. national (for comparison)" }
+                                    td { "~$110–140k" }
+                                    td { strong { "~$400k+" } }
+                                    td { "~3–3.5×" }
+                                }
+                            }
+                        }
+                    }
+                    p {
+                        "So a mid-1990s suburban Kansas City house that felt like a "
+                        strong { "$130,000" } " purchase is, at a ~3.7× constant-quality "
+                        "path, a " strong { "~$480,000" } " asset today — right on top of "
+                        "recent Johnson County medians near " strong { "$485–495k" } ". "
+                        "That is " em { "not" } " California math. It is also not free: "
+                        "in local income terms, and especially in monthly payment terms "
+                        "after the 2022 rate reset, suburban Kansas still feels much tighter "
+                        "than it did when 30-year mortgages printed near 8% on a "
+                        "six-figure house."
+                    }
+                    p {
+                        "Quality and size matter in the dollar comparison. Many 2026 "
+                        "Johnson County sales are larger, better-appointed houses than the "
+                        "1995 starter. The FHFA index tries to hold quality closer to "
+                        "constant; raw medians mix composition change with pure price "
+                        "change. Use the " strong { "~3–3.7×" } " band as the honest "
+                        "thirty-year appreciation story, and the absolute medians as "
+                        "what a buyer actually writes a check for."
+                    }
+
+                    h3 { "How that squares with land, materials, and labor" }
+                    p {
+                        "Recall the national cost curves: materials ~2.5–2.6×, construction "
+                        "labor ~2.5×, CPI ~2×, land " em { "much" } " more than that in "
+                        "constrained metros. Suburban Kansas sits in the middle of that "
+                        "sandwich:"
+                    }
+                    ul {
+                        li {
+                            strong { "House prices (~3–3.7×)" } " outrun materials and labor "
+                            "(~2.5×) and general inflation (~2×), so structure costs alone "
+                            "cannot explain the full run-up — there is still a residual of "
+                            "land, lot improvements, fees, larger/more coded houses, and "
+                            "post-2020 demand/inventory effects."
+                        }
+                        li {
+                            strong { "But land is not the coastal story." } " Davis–Palumbo "
+                            "found Midwest large-city land shares starting in the "
+                            strong { "low teens or below" } " in the mid-1980s and rising "
+                            "from a low base, versus West Coast shares already near "
+                            strong { "half of home value" } " by then. FHFA land research "
+                            "likewise shows national land-price growth concentrated in "
+                            "high-value coastal counties. Johnson County lots got more "
+                            "expensive as the metro grew and good school districts "
+                            "attracted demand — they did not become San Jose parcels."
+                        }
+                        li {
+                            strong { "New construction is where materials and labor bind." }
+                            " A builder putting up a spec home on the Olathe or Wichita "
+                            "fringe faces nearly the same lumber, drywall, HVAC equipment, "
+                            "and trade-crew market as the rest of the country. NAHB’s "
+                            "structure-heavy cost stack (construction often ~60%+ of a "
+                            "new-home price) is more descriptive of suburban Kansas than of "
+                            "an infill bungalow in a coastal city. When materials and wages "
+                            "step up 2.5×, the " em { "floor" } " under new KC-suburb "
+                            "prices steps up with them."
+                        }
+                        li {
+                            strong { "Existing stock still prices off replacement cost "
+                            "plus land." } " A 1990s ranch in Overland Park is not rebuilt "
+                            "every year, but buyers and appraisers anchor to what a "
+                            "comparable new house would cost nearby. Higher structure costs "
+                            "therefore lift older houses even when the lot was cheap to "
+                            "buy in 1995."
+                        }
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "If a 1995 suburban KS house was $130k…" }
+                                    th { "Implied 2026 dollars at that factor" }
+                                    th { "Share of a ~$480k outcome" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "CPI only (~2×)" }
+                                    td { "~$260k" }
+                                    td { "Inflation baseline — still ~$220k short" }
+                                }
+                                tr {
+                                    td { "Materials / labor path (~2.5×)" }
+                                    td { "~$325k" }
+                                    td { "Structure-cost path — still ~$155k short" }
+                                }
+                                tr {
+                                    td { "Observed HPI path (~3.7×)" }
+                                    td { strong { "~$480k" } }
+                                    td { "Actual appreciation path" }
+                                }
+                                tr {
+                                    td { "Residual above structure path" }
+                                    td { strong { "~$155k" } }
+                                    td {
+                                        "Land, location premium, scarcity, quality/"
+                                        "code, finance cycle — not lumber alone"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    p class="callout" {
+                        "Suburban Kansas " em { "confirms" } " the breakdown: it is not a "
+                        "land-only market like coastal California, and it is not a pure "
+                        "materials-and-labor market either. About two-thirds of a "
+                        "thirty-year nominal price path lines up with structure-cost "
+                        "inflation; the rest is land, location, regulatory soft costs, "
+                        "bigger/better product, and the 2020s demand/inventory squeeze. "
+                        "That is why a Johnson County median near half a million still "
+                        "looks affordable next to the coasts — and still feels expensive "
+                        "next to a mid-90s paycheck."
+                    }
+                    p {
+                        "Contrast the same residual logic on the coasts: if the house "
+                        "price multiple is 6–10× over thirty years while structure costs "
+                        "are ~2.5×, almost all of the gap is land and entitlement. "
+                        "Kansas keeps the residual smaller; the national essay’s ranking "
+                        "(land first in scarce places; structure costs as the universal "
+                        "floor) holds."
+                    }
+                }
+
+                section {
+                    h2 { "7. Why the whole market is still high in 2026" }
+                    p {
+                        "Even after construction cost inflation cooled from its 2021–22 peak, "
+                        "existing-home prices stayed elevated. Several demand-and-inventory "
+                        "mechanisms did the work:"
+                    }
+                    ol {
+                        li {
+                            strong { "Chronic underbuilding." } " After the Global Financial "
+                            "Crisis, U.S. housing starts ran below household formation for "
+                            "years. Estimates of cumulative shortage often land in the "
+                            strong { "low millions of units" } ". You do not clear a multi-year "
+                            "supply deficit in one soft spring market."
+                        }
+                        li {
+                            strong { "Pandemic demand shock." } " Remote work, low rates, and "
+                            "stimulus compressed years of price growth into 2020–22 (~40% "
+                            "national house-price jump in a bit over two years in some indexes). "
+                            "By mid-decade, growth rates normalized; the " em { "level" } " did not "
+                            "reset."
+                        }
+                        li {
+                            strong { "Rate lock-in." } " Owners who refinanced near 3% are "
+                            "reluctant to sell into 6–7% mortgages. Turnover falls, listings "
+                            "stay thin, and the few homes that list clear at high prices even "
+                            "if volume is low."
+                        }
+                        li {
+                            strong { "Local barriers to density." } " Single-family zoning, "
+                            "minimum lot sizes, parking mandates, and multi-year entitlement "
+                            "fights keep new supply from responding where prices signal "
+                            "shortage. That converts income and population growth into land "
+                            "appreciation."
+                        }
+                        li {
+                            strong { "Carrying costs beyond the mortgage." } " Insurance "
+                            "(especially in disaster-exposed states), property taxes, and HOA "
+                            "fees rose with rebuild costs and assessed values. Monthly "
+                            "ownership pain can rise even when list prices flatten."
+                        }
+                    }
+                    p {
+                        "Finance is the amplifier. Cheap credit (2020–21) allowed buyers to "
+                        "bid prices up; expensive credit (2022–26) freezes mobility without "
+                        "forcing a 2008-style crash while unemployment stays low and sellers "
+                        "are not forced. High prices can be a " em { "sticky equilibrium" } "."
+                    }
+                }
+
+                section {
+                    h2 { "8. Putting the three cost curves side by side" }
+                    p {
+                        "A simplified mental model for 1995 → 2025/26:"
+                    }
+                    ul {
+                        li {
+                            strong { "Materials index:" } " roughly +150–160% nominal "
+                            "(~2.5–2.6×). Real increase: moderate. Volatility: high in "
+                            "commodities like lumber."
+                        }
+                        li {
+                            strong { "Labor rates:" } " roughly +150% nominal for average "
+                            "construction hourly pay. Real increase: moderate. Effective "
+                            "project labor cost can be higher because of overtime, "
+                            "subcontractor margins, and longer schedules."
+                        }
+                        li {
+                            strong { "Land:" } " multiplies far more than 2.5× in constrained "
+                            "metros; closer to structure-like growth in elastic, low-demand "
+                            "places. National aggregates sit between those poles, pulled up "
+                            "by coastal wealth concentration."
+                        }
+                        li {
+                            strong { "House prices:" } " roughly triple nominally nationally; "
+                            "worse vs. incomes; far worse in superstar cities."
+                        }
+                    }
+                    p {
+                        "So the honest ranking for “why is housing so expensive in July 2026?” "
+                        "is:"
+                    }
+                    ol {
+                        li {
+                            strong { "Location scarcity + land-use rules" } " (especially for "
+                            "existing homes in desirable places)."
+                        }
+                        li {
+                            strong { "Too few homes built for a decade-plus" } ", then a "
+                            "demand spike that inventory never fully absorbed."
+                        }
+                        li {
+                            strong { "Mortgage-rate regime" } " that simultaneously juiced "
+                            "prices (when rates were low) and now freezes supply (when rates "
+                            "are high)."
+                        }
+                        li {
+                            strong { "Structure costs" } " — materials and labor — setting a "
+                            "higher floor under " em { "new" } " construction and rebuild/"
+                            "insurance costs, with a permanent step-up after 2020–22."
+                        }
+                    }
+                }
+
+                section {
+                    h2 { "9. What would actually bring prices down" }
+                    p {
+                        "None of this is a forecast. It is a constraint list:"
+                    }
+                    ul {
+                        li {
+                            strong { "Allow more homes where people already want to live" } " — "
+                            "ADUs, duplexes, mid-rise near jobs and transit. That attacks the "
+                            "land premium directly."
+                        }
+                        li {
+                            strong { "Shorten entitlement and fee stacks" } " so soft costs "
+                            "stop acting like a shadow land tax."
+                        }
+                        li {
+                            strong { "Expand the construction labor pipeline" } " (training, "
+                            "immigration, factory methods) so wage growth shows up as "
+                            "higher living standards for workers without endless schedule "
+                            "slippage."
+                        }
+                        li {
+                            strong { "Materials:" } " trade and capacity policy matter at the "
+                            "margin, but even free lumber will not make San Jose cheap if lots "
+                            "and permits stay scarce."
+                        }
+                        li {
+                            strong { "Rates:" } " lower mortgage rates improve payments but, "
+                            "with tight supply, often re-bid into prices. Affordability needs "
+                            "supply response, not only cheaper credit."
+                        }
+                    }
+                    p {
+                        "Fossall’s adjacent interest — low-cost mobility and open systems — "
+                        "is a reminder that " em { "shelter and transport are joint "
+                        "household budgets" } ". Expensive land near jobs forces longer "
+                        "commutes or exotic housing forms. Understanding which cost is "
+                        "land versus structure is how you stop solving the wrong problem "
+                        "with the wrong tool."
+                    }
+                }
+
+                section class="closing" {
+                    h2 { "Sources and caveats" }
+                    p {
+                        "Order-of-magnitude figures draw on publicly discussed series and "
+                        "reports: Census / FRED average and median sale prices; FHFA house "
+                        "and land research; Davis-Heathcote / Davis-Palumbo land share work "
+                        "and AEI land indicators; BLS construction materials PPI "
+                        "(WPUSI012011) and construction earnings; NAHB cost-of-construction "
+                        "and regulation studies; Harvard JCHS " em { "State of the Nation's "
+                        "Housing" } " (2026); Realtor.com / Redfin metro medians; FHFA HPI "
+                        "for Kansas City (MO-KS) and Wichita; HUD historical metro price "
+                        "notes. Indexes are "
+                        "rebased and revised; metro experiences diverge wildly from the "
+                        "national average. This page is an explanatory sketch, not "
+                        "investment advice."
+                    }
+                    p {
+                        a class="btn secondary" href="/" hx-boost="true" { "← Back home" }
+                        " "
+                        a class="btn secondary" href="/rv" hx-boost="true" {
+                            "Related: housing vs container EV-RV →"
+                        }
+                    }
+                }
+            }
+        },
+    )
+}
 
 /// `GET /health` — liveness for Fly.
 pub async fn health() -> &'static str {

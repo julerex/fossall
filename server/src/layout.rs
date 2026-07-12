@@ -31,6 +31,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
                     nav hx-boost="true" {
                         a href="/" { "Home" }
                         a href="/rv" { "Container EV-RV" }
+                        a href="/homeprices" { "Home prices" }
                     }
                 }
                 main { (body) }

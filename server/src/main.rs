@@ -17,6 +17,7 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .route("/", get(pages::home))
         .route("/rv", get(pages::rv_essay))
+        .route("/homeprices", get(pages::homeprices))
         .route("/health", get(pages::health))
         .nest_service("/static", ServeDir::new(&static_root))
         .nest_service("/wasm", ServeDir::new(static_root.join("wasm")));
