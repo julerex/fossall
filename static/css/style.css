@@ -208,6 +208,68 @@ main {
   margin-bottom: 0.4rem;
 }
 
+.essay h3 {
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 650;
+  margin: 1.5rem 0 0.65rem;
+}
+
+.essay .callout {
+  margin: 1.25rem 0;
+  padding: 0.9rem 1.1rem;
+  background: var(--widget);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0.35rem;
+  font-size: 0.98rem;
+  color: #2a2a2a;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0 1.35rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.data-table th {
+  font-weight: 650;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(11, 95, 74, 0.06);
+}
+
+.data-table tbody tr:last-child th,
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table .total-row td {
+  background: rgba(11, 95, 74, 0.07);
+  border-top: 1px solid var(--border);
+}
+
 .widget {
   background: var(--widget);
   border: 1px solid var(--border);
@@ -432,6 +494,18 @@ main {
   .essay p,
   .essay li {
     color: #ddd8cf;
+  }
+
+  .essay .callout {
+    color: #ddd8cf;
+  }
+
+  .data-table th {
+    background: rgba(93, 186, 154, 0.1);
+  }
+
+  .data-table .total-row td {
+    background: rgba(93, 186, 154, 0.12);
   }
 
   .btn {

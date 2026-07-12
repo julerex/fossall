@@ -8,10 +8,10 @@ use wasm_bindgen::prelude::*;
 /// Rough battery energy density (pack-level, modern EV packs), Wh/kg.
 const WH_PER_KG: f64 = 160.0;
 
-/// Rough pack cost, USD per kWh (pack, not cell; ballpark mid-2020s).
-const USD_PER_KWH: f64 = 120.0;
+/// Rough pack cost, USD per kWh (pack, not cell; volume mid-2020s planning band).
+const USD_PER_KWH: f64 = 100.0;
 
-/// Average highway consumption for a large, boxy electric RV, Wh/km.
+/// Average consumption for a tall, boxy electric RV at modest speed, Wh/km.
 const WH_PER_KM: f64 = 450.0;
 
 /// Estimate usable pack energy (kWh), mass (kg), cost (USD), and range (km)
@@ -28,14 +28,14 @@ pub fn estimate_pack(kwh: f64) -> String {
 
     format!(
         "{kwh:.0} kWh pack ≈ {mass_kg:.0} kg · ~${cost_usd:.0} · \
-         ~{range_km:.0} km ({range_mi:.0} mi) highway (rough)"
+         ~{range_km:.0} km ({range_mi:.0} mi) at ~450 Wh/km (rough)"
     )
 }
 
-/// Default slider value for the essay widget.
+/// Default slider value for the essay widget (short-range product case).
 #[wasm_bindgen]
 pub fn default_kwh() -> f64 {
-    100.0
+    90.0
 }
 
 #[cfg(test)]
@@ -44,10 +44,15 @@ mod tests {
 
     #[test]
     fn estimate_is_sane() {
-        let s = estimate_pack(100.0);
-        assert!(s.contains("100 kWh"));
+        let s = estimate_pack(90.0);
+        assert!(s.contains("90 kWh"));
         assert!(s.contains("kg"));
         assert!(s.contains("km"));
+    }
+
+    #[test]
+    fn default_is_short_range_product() {
+        assert!((default_kwh() - 90.0).abs() < f64::EPSILON);
     }
 
     #[test]
