@@ -1,0 +1,13 @@
+[package]
+name = "fossall-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+axum = "0.8"
+maud = { version = "0.27", features = ["axum"] }
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.6", features = ["fs"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
