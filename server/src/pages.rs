@@ -116,6 +116,16 @@ pub async fn rv_essay() -> impl IntoResponse {
                         li { "Body: composite or aluminum skin over a purpose-built EV chassis, not a raw container." }
                         li { "Interior: fixed wet cell + transformable living space; volume is the scarce resource." }
                     }
+                    p {
+                        "One credible road form factor is the "
+                        em { "cabless hauler" } " pattern: a low electric skateboard with multi-axle "
+                        "e-drive, corner sensor pods, and a lock interface for a 40′ box — the same "
+                        "family of idea as commercial autonomous container haulers, but with the "
+                        "box fitted as a living module (windows, door, solar, wet cell) rather than "
+                        "sealed freight. Explore a rough interactive sketch below."
+                    }
+
+                    (rv_model_widget())
                 }
 
                 section {
@@ -251,6 +261,47 @@ pub async fn rv_essay() -> impl IntoResponse {
         },
     )
 }
+
+/// Interactive 3D sketch of the 40′ container-scale EV-RV (Three.js).
+fn rv_model_widget() -> Markup {
+    html! {
+        figure class="rv-model-figure" id="rv-model-figure" {
+            figcaption class="rv-model-caption" {
+                h3 { "Proposed form: 40′ cabless EV-RV" }
+                p {
+                    "Procedural sketch — ISO 40′ high-cube envelope on a cabless multi-axle "
+                    "electric chassis with autonomy sensor pods. Inspired by self-driving "
+                    "hauler form factors; not an engineering CAD model."
+                }
+            }
+            div class="rv-model" id="rv-model" {
+                canvas aria-label="Interactive 3D model of a 40-foot container-scale electric self-driving RV" {}
+                div class="rv-model-toolbar" role="toolbar" aria-label="Model controls" {
+                    button type="button" class="rv-model-btn" data-rv-action="reset" { "Reset view" }
+                    button type="button" class="rv-model-btn" data-rv-action="rotate" aria-pressed="true" { "Auto-rotate" }
+                    button type="button" class="rv-model-btn" data-rv-action="cutaway" aria-pressed="false" { "Cutaway" }
+                    button type="button" class="rv-model-btn" data-rv-action="chassis" aria-pressed="false" { "Chassis only" }
+                    button type="button" class="rv-model-btn" data-rv-action="labels" aria-pressed="true" { "Labels" }
+                }
+                p class="rv-model-status" data-rv-status { "Loading 3D viewer…" }
+            }
+            (PreEscaped(RV_MODEL_BOOTSTRAP))
+        }
+    }
+}
+
+/// Mount the procedural Three.js model (import map lives in layout head).
+/// Inline module so HTMX boost re-evaluates on navigation to `/rv`.
+const RV_MODEL_BOOTSTRAP: &str = r#"
+<script type="module">
+  import { mountRvModel } from '/static/js/rv-model.js';
+  const host = document.getElementById('rv-model');
+  if (host && host.dataset.mounted !== '1') {
+    host.dataset.mounted = '1';
+    mountRvModel(host);
+  }
+</script>
+"#;
 
 /// Interactive pack estimator shell; logic runs in `/wasm/fossall_wasm.js`.
 fn pack_estimator_widget() -> Markup {

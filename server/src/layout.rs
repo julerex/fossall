@@ -15,6 +15,15 @@ pub fn page(title: &str, body: Markup) -> Markup {
                 link rel="icon" href="/static/favicon.svg" type="image/svg+xml";
                 link rel="stylesheet" href="/static/css/style.css";
                 script src="/static/htmx.min.js" defer {}
+                // Import map for optional Three.js modules (3D sketch on /rv).
+                script type="importmap" {
+                    (maud::PreEscaped(r#"{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}"#))
+                }
             }
             body {
                 header class="site-header" {

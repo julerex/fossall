@@ -9,7 +9,7 @@ A small public site built almost entirely in Rust:
 - **Rust WASM** for the interactive battery-pack estimator on the essay page
 - Deployed on **Fly.io** at [fossall.com](https://fossall.com)
 
-First piece of content: a feasibility sketch of a low-cost, fully electric, fully self-driving recreational vehicle about the size of a shipping container — see `/rv`.
+First piece of content: a feasibility sketch of a low-cost, fully electric, fully self-driving recreational vehicle about the size of a shipping container — see `/rv` (includes an interactive Three.js model of a 40′ cabless EV-RV form factor).
 
 ## Local development
 
