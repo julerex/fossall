@@ -61,7 +61,8 @@ pub async fn rv_essay() -> impl IntoResponse {
                         "and still lands at a price ordinary people might actually pay? "
                         "This page is an open look at the hard parts — form factor, energy, "
                         "solar, autonomy, and cost — including a Tesla-scale cost estimate "
-                        "for a mostly parked, short-range mission."
+                        "for a mostly parked, short-range mission, and how that price stacks "
+                        "up against U.S. housing and apartment rents."
                     }
                 }
 
@@ -542,7 +543,287 @@ pub async fn rv_essay() -> impl IntoResponse {
                 }
 
                 section {
-                    h2 { "7. Open questions and a FOSS angle" }
+                    h2 { "7. Housing comparison: price per square metre, rents, and leases" }
+                    p {
+                        "A container-scale RV is not only a vehicle; for someone who mostly "
+                        "parks it, it competes with " em { "housing" } ". The fair yardsticks "
+                        "are purchase price per unit of living area, monthly rent for "
+                        "comparable space, and — if Tesla builds and finances it — a "
+                        "monthly lease payment in the same language as passenger-car leases."
+                    }
+
+                    h3 { "Living area of the box" }
+                    p {
+                        "A 40′ high-cube envelope is about " strong { "12.2 × 2.44 m" }
+                        " outside (~30 m² footprint). Interior floor of a true ISO box is "
+                        "about " strong { "28 m² (~300 ft²)" } "; after insulation, structure, "
+                        "and a wet cell, usable living floor is more like "
+                        strong { "22–26 m² (~240–280 ft²)" } " — studio territory, not a "
+                        "suburban house. The comparison below uses " strong { "~25 m² "
+                        "(~270 ft²)" } " as a mid usable figure and " strong { "$140,000" }
+                        " as the base Tesla-scale MSRP from §6."
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Metric" }
+                                    th { "This EV-RV (~$140k, ~25 m²)" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "Purchase price per m² of living space" }
+                                    td { strong { "~$5,600 / m²" } " (~$520 / ft²)" }
+                                }
+                                tr {
+                                    td { "Purchase price per ft²" }
+                                    td { "~$520 / ft²" }
+                                }
+                            }
+                        }
+                    }
+
+                    h3 { "U.S. house prices (mid-2026 ballpark)" }
+                    p {
+                        "National medians move month to month, but order of magnitude for "
+                        "recent U.S. sales and listings:"
+                    }
+                    ul {
+                        li {
+                            "Median home sale price on the order of "
+                            strong { "$400k" } " (Census/FRED and major listing indexes "
+                            "cluster near that band in 2025–2026)."
+                        }
+                        li {
+                            "National median " strong { "listing price per square foot "
+                            "around ~$220–230 / ft²" } " (~" strong { "$2,400–2,500 / m²" }
+                            ") in mid-2026 — roughly half the per-area purchase price of "
+                            "this RV."
+                        }
+                        li {
+                            "Hot coastal markets are another world: large California and "
+                            "Seattle-class metros often trade around "
+                            strong { "$500–650+ / ft²" } " (~$5,400–7,000 / m²). On pure "
+                            "dollars per living square metre, a $140k mobile studio can "
+                            em { "undercut" } " those markets while still looking expensive "
+                            "versus Midwest or Southern single-family stock."
+                        }
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Asset" }
+                                    th { "Approx. $/m² living" }
+                                    th { "Approx. $/ft²" }
+                                    th { "Notes" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "U.S. median listing (national)" }
+                                    td { "~$2,400–2,500" }
+                                    td { "~$220–230" }
+                                    td { "Fixed house + land share baked in" }
+                                }
+                                tr {
+                                    td { "Expensive coastal metros" }
+                                    td { "~$5,400–7,000+" }
+                                    td { "~$500–650+" }
+                                    td { "LA / Seattle-class sale $/ft²" }
+                                }
+                                tr {
+                                    td { strong { "This EV-RV at $140k" } }
+                                    td { strong { "~$5,600" } }
+                                    td { strong { "~$520" } }
+                                    td { "Includes drivetrain; no land" }
+                                }
+                            }
+                        }
+                    }
+                    p {
+                        "Read that carefully. Against a " em { "national" } " median house, "
+                        "the RV is expensive housing per square metre — you are paying for "
+                        "motors, battery, chassis, and a factory interior in a tiny footprint. "
+                        "Against " em { "expensive coastal" } " purchase prices, it is in the "
+                        "same band or cheaper " em { "per living area" } ", and you still have "
+                        "to park somewhere (land, pad, or lot fee is extra). The product thesis "
+                        "is not “cheaper than every American house”; it is “a relocatable "
+                        "studio whose all-in sticker is a fraction of a median mortgage "
+                        "principal, with a car built in.”"
+                    }
+
+                    h3 { "U.S. apartment rents" }
+                    p {
+                        "Recent national rental snapshots (50 largest metros / national "
+                        "asking medians, early–mid 2026):"
+                    }
+                    ul {
+                        li {
+                            "Overall median asking rent in large metros around "
+                            strong { "$1,650–1,750 / month" } "."
+                        }
+                        li {
+                            "Studios roughly " strong { "$1,350–1,450" } "; 1-bedrooms "
+                            strong { "~$1,500–1,600" } "; 2-bedrooms " strong { "~$1,700–1,850" }
+                            " (varies by index and month)."
+                        }
+                        li {
+                            "National average apartment size often cited near "
+                            strong { "~700–900+ ft²" } " depending on the dataset — larger "
+                            "than this RV’s usable floor, so rent " em { "per square foot" }
+                            " for small units is usually higher than for big ones."
+                        }
+                        li {
+                            "Ballpark rent intensity: about "
+                            strong { "$2.0–2.5 / ft² / month" } " annually averaged "
+                            "(~$22–27 / m² / month), with studios and coastal markets higher."
+                        }
+                    }
+                    p {
+                        "If you priced the RV’s ~270 ft² of living space at a modest "
+                        strong { "$2.50 / ft² / month" } " apartment-equivalent rent, you "
+                        "get about " strong { "$675 / month" } " for the " em { "space alone" }
+                        " — before parking, utilities, or the fact that the unit can move. "
+                        "A large-metro studio asking rent (~$1,400) buys more square metres "
+                        "in many buildings, but not wheels, solar, or the ability to leave."
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Monthly cost" }
+                                    th { "Ballpark" }
+                                    th { "What you get" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "U.S. large-metro studio rent" }
+                                    td { "~$1,350–1,450" }
+                                    td { "Fixed address, often more floor area, no vehicle" }
+                                }
+                                tr {
+                                    td { "U.S. large-metro 1-bedroom" }
+                                    td { "~$1,500–1,600" }
+                                    td { "Typical renter benchmark" }
+                                }
+                                tr {
+                                    td { "Implied “space only” rent for ~270 ft² @ $2.50/ft²" }
+                                    td { "~$675" }
+                                    td { "Floor area only; unfairly ignores mobility" }
+                                }
+                                tr {
+                                    td { strong { "Plausible EV-RV lease (below)" } }
+                                    td { strong { "~$1,400–2,000" } }
+                                    td { "Housing-sized payment that includes the vehicle" }
+                                }
+                            }
+                        }
+                    }
+
+                    h3 { "Tesla-style lease: what monthly payment is plausible?" }
+                    p {
+                        "Tesla publishes lease offers for its cars (see Tesla’s model "
+                        "comparison / current offers pages — terms change often). As of "
+                        "mid-2026, promotional U.S. Model Y leases were in the ballpark of:"
+                    }
+                    div class="table-wrap" {
+                        table class="data-table" {
+                            thead {
+                                tr {
+                                    th { "Vehicle (promotional lease, ~36 mo)" }
+                                    th { "Advertised $/mo" }
+                                    th { "Due at signing (order of magnitude)" }
+                                }
+                            }
+                            tbody {
+                                tr {
+                                    td { "Model Y RWD" }
+                                    td { "~$459" }
+                                    td { "~$4,100–4,200" }
+                                }
+                                tr {
+                                    td { "Model Y AWD" }
+                                    td { "~$499" }
+                                    td { "~$4,200" }
+                                }
+                                tr {
+                                    td { "Model Y Premium RWD / AWD" }
+                                    td { "~$599 / ~$699" }
+                                    td { "~$4,300–4,400" }
+                                }
+                                tr {
+                                    td { "Model Y Performance" }
+                                    td { "~$799" }
+                                    td { "~$4,500" }
+                                }
+                            }
+                        }
+                    }
+                    p {
+                        "Those figures are " em { "not" } " a promise for an RV product; they "
+                        "are a calibration for how Tesla prices monthly access to a ~$40–60k "
+                        "asset. A crude scale from Model Y RWD (~$42k all-in starting price, "
+                        "~$459/mo advertised) is about " strong { "1.1% of MSRP per month" }
+                        " on the sticker payment, or closer to "
+                        strong { "~$570–600 / month effective" } " if you amortize due-at-signing "
+                        "over 36 months. Residual value, mileage caps, money factor, and "
+                        "credit tiers all move the real number."
+                    }
+                    p {
+                        "Apply the same order of magnitude to a " strong { "$140k" } " RV:"
+                    }
+                    ul {
+                        li {
+                            strong { "Sticker-style payment:" } " 1.1% × $140k ≈ "
+                            strong { "$1,540 / month" } " advertised, before taxes."
+                        }
+                        li {
+                            strong { "With proportional due-at-signing" } " (~10% of MSRP, "
+                            "as on many Model Y promos): roughly "
+                            strong { "$14k down" } " + " strong { "~$1,500–1,600 / month" }
+                            ", or an effective ~$1,900–2,000 / month if you roll DAS into "
+                            "the 36-month cost."
+                        }
+                        li {
+                            strong { "Residual-driven range:" } " if depreciation and finance "
+                            "charges behave more like a specialized vehicle (weaker residual "
+                            "than a Model Y), payments could land "
+                            strong { "$1,700–2,200 / month" } ". A strong residual program "
+                            "(fleet buyback, high expected demand) could hold closer to "
+                            strong { "$1,400–1,600" } "."
+                        }
+                    }
+                    p class="callout" {
+                        "Planning band for a Tesla-style 36-month lease on the $140k base RV: "
+                        strong { "about $1,500–2,000 per month" } " all-in effective, or "
+                        "roughly " strong { "one large-metro 1-bedroom rent" } " that also "
+                        "includes your transport — or a bit more than a studio if residuals "
+                        "are weak."
+                    }
+                    p {
+                        "Whether that is a good deal depends on use. If the RV replaces "
+                        strong { "both" } " a car payment (~$450–700 for a leased Model Y) "
+                        strong { "and" } " rent (~$1,500–1,700), a "
+                        strong { "~$1,600–1,900" } " combined lease can look rational — "
+                        "especially with solar covering much of the parked energy bill. If "
+                        "it is a third vehicle plus a weekend toy on top of a full apartment, "
+                        "it is just an expensive hobby. Zoning, insurance, and where you may "
+                        "legally live in a vehicle will matter more than the payment math."
+                    }
+                    p {
+                        "One more honesty check: auto leases assume high residual values and "
+                        "tight mileage. A mostly parked house-on-wheels may " em { "help" }
+                        " residuals (low odometer) or " em { "hurt" } " them (oddball segment, "
+                        "interior wear, regulatory uncertainty). The $1,500–2,000 band is a "
+                        "bridge from Tesla’s published car leases, not a term sheet."
+                    }
+                }
+
+                section {
+                    h2 { "8. Open questions and a FOSS angle" }
                     p {
                         "The cost model above assumes a closed, high-volume OEM. Fossall’s "
                         "interest is different: which pieces of the same idea can still be "
@@ -573,9 +854,11 @@ pub async fn rv_essay() -> impl IntoResponse {
                         "unsupervised door-to-door autonomy, and Model Y pricing. Narrow the "
                         "mission to " strong { "short moves, mostly parked, 80 km/h, "
                         "honest solar, ~90 kWh" } " and a Tesla-scale builder could "
-                        "plausibly land near " strong { "$130–170k" } ". That is not free. "
-                        "It " em { "is" } " in the same conversation as premium vans and mid "
-                        "Class A coaches, with a better energy story."
+                        "plausibly land near " strong { "$130–170k" } " purchase or roughly "
+                        strong { "$1,500–2,000 / month" } " leased. That is not free. "
+                        "It " em { "is" } " in the same conversation as premium vans, mid "
+                        "Class A coaches, and — for some people — replacing a car lease plus "
+                        "a studio rent with one payment."
                     }
                 }
 
@@ -583,9 +866,10 @@ pub async fn rv_essay() -> impl IntoResponse {
                     h2 { "Next" }
                     p {
                         "This page is still a sketch, but the cost model is now something "
-                        "others can argue with: mass budget, solar yield, pack size, and a "
-                        "Tesla-scale BOM. Follow-ons: tighter chassis platform choices, "
-                        "interior mass/cost, and regulatory path by market. Until then: FOSS "
+                        "others can argue with: mass budget, solar yield, pack size, a "
+                        "Tesla-scale BOM, and a housing/lease comparison. Follow-ons: tighter "
+                        "chassis platform choices, interior mass/cost, residual-value "
+                        "assumptions, and regulatory path by market. Until then: FOSS "
                         "all the things you can, and be honest about the rest."
                     }
                     p {
