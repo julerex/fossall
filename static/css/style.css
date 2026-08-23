@@ -522,12 +522,12 @@ main {
 }
 
 .word-table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
   font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 0.4rem;
@@ -535,7 +535,8 @@ main {
 
 .word-table td {
   text-align: center;
-  padding: 0.2rem 0.25rem;
+  padding: 0.15rem 0.28rem;
+  white-space: nowrap;
   border-bottom: 1px solid var(--border);
 }
 
@@ -544,8 +545,8 @@ main {
 }
 
 .word-table td.word-real {
-  background: rgba(11, 95, 74, 0.18);
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
   font-weight: 700;
 }
 
@@ -610,6 +611,7 @@ main {
   }
 
   .word-table td.word-real {
-    background: rgba(93, 186, 154, 0.22);
+    background: var(--accent);
+    color: #0a1210;
   }
 }

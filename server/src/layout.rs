@@ -13,7 +13,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
                 title { (title) " · Fossall" }
                 meta name="description" content="FOSS all the things — experiments in open, low-cost mobility and software.";
                 link rel="icon" href="/static/favicon.svg" type="image/svg+xml";
-                link rel="stylesheet" href="/static/css/style.css";
+                link rel="stylesheet" href="/static/css/style.css?v=2";
                 script src="/static/htmx.min.js" defer {}
                 // Import map for optional Three.js modules (3D sketch on /rv).
                 script type="importmap" {

@@ -18,8 +18,8 @@ const ALPHA: usize = 26;
 /// Every `[a-z]` triple that can follow a two-letter prefix.
 pub const COMBINATIONS: usize = ALPHA * ALPHA * ALPHA;
 
-/// Cells per table row.
-pub const TABLE_COLS: usize = 5;
+/// Cells per table row (one full last-letter cycle).
+pub const TABLE_COLS: usize = 26;
 
 #[derive(Debug, Deserialize, Default)]
 pub struct WordsQuery {
@@ -266,6 +266,12 @@ mod tests {
         assert_eq!(combo_at("st", ALPHA), *b"staba");
         assert_eq!(combo_at("st", ALPHA * ALPHA), *b"stbaa");
         assert!(combo_at("st", 0) < combo_at("st", 1));
+    }
+
+    #[test]
+    fn table_is_twenty_six_columns() {
+        assert_eq!(TABLE_COLS, 26);
+        assert_eq!(COMBINATIONS % TABLE_COLS, 0);
     }
 
     #[test]
