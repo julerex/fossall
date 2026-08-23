@@ -32,6 +32,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
                         a href="/" { "Home" }
                         a href="/rv" { "Container EV-RV" }
                         a href="/homeprices" { "Home prices" }
+                        a href="/words" { "Words" }
                     }
                 }
                 main { (body) }

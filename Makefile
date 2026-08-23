@@ -1,4 +1,4 @@
-.PHONY: dev build build-wasm run lint fmt test deploy fly-logs
+.PHONY: dev build build-wasm run lint fmt test seed deploy fly-logs
 
 CARGO = env -u ARGV0 cargo
 WASM_BINDGEN ?= wasm-bindgen
@@ -31,6 +31,9 @@ fmt:
 test:
 	$(CARGO) test -p fossall-server
 	$(CARGO) test -p fossall-wasm
+
+seed:
+	$(CARGO) run -p fossall-server --bin seed
 
 deploy:
 	fly deploy

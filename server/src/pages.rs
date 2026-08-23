@@ -27,6 +27,11 @@ pub async fn home() -> impl IntoResponse {
                         "Why home prices are high in 2026 →"
                     }
                 }
+                p {
+                    a class="btn secondary" href="/words" hx-boost="true" {
+                        "Explore five-letter strings →"
+                    }
+                }
             }
             section class="cards" {
                 article {
@@ -51,6 +56,13 @@ pub async fn home() -> impl IntoResponse {
                     p {
                         "Why U.S. housing is still expensive in July 2026 — and how land, "
                         "building materials, and labor costs have diverged over thirty years."
+                    }
+                }
+                article {
+                    h2 { "Words" }
+                    p {
+                        "Type two letters and see every five-letter string that starts with "
+                        "them. Real ENABLE words, stored in Postgres, are highlighted."
                     }
                 }
             }

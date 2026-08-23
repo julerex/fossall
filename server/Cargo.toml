@@ -7,6 +7,8 @@ edition = "2021"
 anyhow = "1"
 axum = "0.8"
 maud = { version = "0.27", features = ["axum"] }
+serde = { version = "1", features = ["derive"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls-ring", "postgres"] }
 tokio = { version = "1", features = ["full"] }
 tower-http = { version = "0.6", features = ["fs"] }
 tracing = "0.1"
