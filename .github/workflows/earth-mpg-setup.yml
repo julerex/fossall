@@ -1,7 +1,8 @@
 # Create database `earth` on postgreputest, attach EARTH_DATABASE_URL
 # (without overwriting DATABASE_URL), and optionally seed CC-BY data.
 #
-# Uses the same FLY_API_TOKEN as deploy.yml. Never prints connection URLs.
+# Prefers GitHub secret FLY_ORG_TOKEN (org-scoped). Falls back to FLY_API_TOKEN.
+# App deploy tokens cannot see MPG clusters. Never prints connection URLs.
 name: Earth MPG setup
 
 on:
@@ -40,9 +41,18 @@ jobs:
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
+      - name: Fly identity (no secrets)
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_ORG_TOKEN || secrets.FLY_API_TOKEN }}
+        run: |
+          set +x
+          flyctl auth whoami || true
+          flyctl mpg list || true
+
       - name: Create database, apply schema, attach secret
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_ORG_TOKEN || secrets.FLY_API_TOKEN }}
+          FLY_ORG_TOKEN: ${{ secrets.FLY_ORG_TOKEN }}
         run: |
           set +x
           chmod +x scripts/earth-mpg-setup.sh
@@ -50,7 +60,7 @@ jobs:
 
       - name: Confirm words DATABASE_URL is still set
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_ORG_TOKEN || secrets.FLY_API_TOKEN }}
         run: |
           set +x
           list="$(flyctl secrets list -a fossall)"
@@ -65,7 +75,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      FLY_API_TOKEN: ${{ secrets.FLY_ORG_TOKEN || secrets.FLY_API_TOKEN }}
+      FLY_ORG_TOKEN: ${{ secrets.FLY_ORG_TOKEN }}
       MPG_CLUSTER: q49ypo4wvmzr17ln
       EARTH_PROXY_PORT: "16380"
       # Educational PBDB slice (full all_records dump is too large for a first run).

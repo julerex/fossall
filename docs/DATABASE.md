@@ -69,6 +69,6 @@ export EARTH_DATABASE_URL="$(cat "${TMPDIR:-/tmp}/earth-database-url")"
 make seed-earth
 ```
 
-Do **not** `fly mpg attach` without `--variable-name` (default secret name is `DATABASE_URL`). Production setup is also `.github/workflows/earth-mpg-setup.yml` (`workflow_dispatch`, same `FLY_API_TOKEN` as deploy). Sources, licenses, and API: [EARTH.md](EARTH.md).
+Do **not** `fly mpg attach` without `--variable-name` (default secret name is `DATABASE_URL`). Production setup is `.github/workflows/earth-mpg-setup.yml`. That workflow needs an **org-scoped** Fly token (`fly tokens create org`) as GitHub secret `FLY_ORG_TOKEN`. The deploy `FLY_API_TOKEN` can ship the app but cannot see MPG clusters. Sources, licenses, and API: [EARTH.md](EARTH.md).
 
 If `EARTH_DATABASE_URL` is unset, `/earth` still renders; `/api/earth/*` returns 503. `/health` never touches Postgres.
