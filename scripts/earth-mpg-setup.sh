@@ -164,8 +164,52 @@ ok_or_exists() {
     esac
 }
 
-ok_or_exists "Database earth" mpg databases create "$CLUSTER" -n earth
-ok_or_exists "User earth" mpg users create "$CLUSTER" -u earth -r writer
+# FLY_ORG makes flyctl inject --org into subcommands that do not accept it
+# (databases create / users create). List needed it; the rest use cluster id.
+unset FLY_ORG
+
+mpg_post() {
+    path="$1"
+    body="$2"
+    auth="${FLY_API_TOKEN:-}"
+    [ -n "$auth" ] || return 1
+    i=0
+    for url in \
+        "https://api.fly.io/api/v1/postgresv2/${CLUSTER}${path}" \
+        "https://fly.io/api/v1/postgresv2/${CLUSTER}${path}" \
+        "https://api.fly.io/api/v1/postgres/${CLUSTER}${path}"
+    do
+        i=$((i + 1))
+        code=$(curl -sS -o "$work/api.$i" -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${auth}" \
+            -H "Content-Type: application/json" \
+            -d "$body" \
+            "$url" || echo 000)
+        rm -f "$work/api.$i"
+        case "$code" in
+            200|201|204|409) return 0 ;;
+        esac
+    done
+    echo "MPG API POST ${path} failed (HTTP body not printed)." >&2
+    return 1
+}
+
+if ok_or_exists "Database earth" mpg databases create "$CLUSTER" -n earth; then
+    :
+elif mpg_post "/databases" '{"name":"earth"}'; then
+    echo "Database earth created via API."
+else
+    exit 1
+fi
+
+if ok_or_exists "User earth" mpg users create "$CLUSTER" -u earth -r writer; then
+    :
+elif mpg_post "/users" '{"user_name":"earth","role":"writer"}'; then
+    echo "User earth created via API."
+else
+    exit 1
+fi
 
 echo "Applying schema to database earth…"
 sql_out="$work/sql"
