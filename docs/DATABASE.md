@@ -73,13 +73,14 @@ Do **not** `fly mpg attach` without `--variable-name` (default secret name is `D
 
 ### One-time: create database `earth`
 
-postgreputest is **MPG v1**. The cluster’s proxy user is not allowed `CREATE DATABASE`, and `fly mpg databases create` returns 404 until the cluster opts into the dashboard role system. Create the database once in the UI, then re-run setup (GitHub Action **Earth MPG setup** or `make earth-mpg-setup`):
+postgreputest is **MPG v1**. `fly mpg databases list` / `users list` work with the deploy token (databases today: `fly-db`, `fossall`, `reputest`, `timehelm`; users include `fly-user` schema_admin and `fossall` writer). `fly mpg databases create` / `users create` return 404 with that token, and the writer role cannot `CREATE DATABASE`.
+
+Either add GitHub secret **`FLY_ORG_TOKEN`** (`fly tokens create org`) and re-run **Earth MPG setup**, or create the database once in the UI:
 
 1. Open [postgreputest in the Fly dashboard](https://fly.io/dashboard/personal/managed_postgres/q49ypo4wvmzr17ln)
-2. **Users** tab: opt in to the new role system if the dashboard asks
-3. **Databases** tab: create a database named `earth`
-4. Optional: **Users** tab → user `earth`, role `writer`
-5. Re-run `.github/workflows/earth-mpg-setup.yml` (workflow_dispatch is fine)
+2. **Databases** tab: create a database named `earth`
+3. Optional: **Users** tab → user `earth`, role `writer`
+4. Re-run `.github/workflows/earth-mpg-setup.yml` (workflow_dispatch is fine)
 
 Do **not** create a second cluster. Sources, licenses, and API: [EARTH.md](EARTH.md).
 

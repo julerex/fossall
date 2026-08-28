@@ -204,6 +204,42 @@ else
     redact < "$work/status.err" >&2
 fi
 
+# Prefer schema_admin fly-user when the credentials endpoint allows it.
+if [ -n "${FLY_API_TOKEN:-}" ]; then
+    cred_code="$(curl -sS -o "$work/flyuser.json" -w '%{http_code}' \
+        -H "Authorization: Bearer ${FLY_API_TOKEN}" \
+        -H "Content-Type: application/json" \
+        "https://api.fly.io/api/v1/postgres/${CLUSTER}/users/fly-user/credentials" || echo 000)"
+    echo "GET fly-user credentials -> HTTP $cred_code"
+    if [ "$cred_code" = "200" ] && command -v python3 >/dev/null 2>&1; then
+        if python3 - "$work/flyuser.json" "$admin_url_file" <<'PY'
+import json, sys, urllib.parse
+from pathlib import Path
+raw = json.loads(Path(sys.argv[1]).read_text())
+data = raw.get("data") if isinstance(raw, dict) else {}
+data = data or {}
+user = data.get("user") or data.get("User") or ""
+password = data.get("password") or data.get("Password") or ""
+if not user or not password:
+    sys.stderr.write("fly-user credentials json missing user/password\n")
+    sys.exit(1)
+url = (
+    "postgres://"
+    + urllib.parse.quote(user, safe="")
+    + ":"
+    + urllib.parse.quote(password, safe="")
+    + "@127.0.0.1:16380/fossall"
+)
+Path(sys.argv[2]).write_text(url)
+Path(sys.argv[2]).chmod(0o600)
+PY
+        then
+            echo "Using fly-user (schema_admin) for SQL (URL not printed)."
+        fi
+    fi
+    rm -f "$work/flyuser.json"
+fi
+
 if [ -f "$admin_url_file" ]; then
     if ! command -v psql >/dev/null 2>&1; then
         echo "psql is required (postgresql-client)" >&2
@@ -211,11 +247,17 @@ if [ -f "$admin_url_file" ]; then
     fi
     mpg proxy "$CLUSTER" --bind-addr 127.0.0.1 --local-port 16380 >/dev/null 2>&1 &
     proxy_pid=$!
-    # dash has no /dev/tcp; the proxy is usually up within a couple of seconds.
-    sleep 3
     export PGSSLMODE=prefer
     export PGGSSENCMODE=disable
     admin_url="$(cat "$admin_url_file")"
+    n=0
+    while [ "$n" -lt 20 ]; do
+        if psql "$admin_url" -c 'SELECT 1' >"$work/psql.wait" 2>&1; then
+            break
+        fi
+        n=$((n + 1))
+        sleep 1
+    done
     if psql "$admin_url" -v ON_ERROR_STOP=1 -c 'SELECT current_user, current_database();' \
         >"$work/whoami" 2>&1; then
         echo "Connected via proxy as:"
@@ -223,6 +265,7 @@ if [ -f "$admin_url_file" ]; then
     else
         echo "psql whoami failed:" >&2
         redact < "$work/whoami" >&2
+        redact < "$work/psql.wait" >&2 || true
     fi
     if psql "$admin_url" -tAc \
         "SELECT datname FROM pg_database WHERE datname = '$DB_NAME'" \
@@ -278,16 +321,16 @@ if [ "$earth_exists" -eq 0 ]; then
     cat >&2 <<EOF
 Database $DB_NAME does not exist on $CLUSTER_NAME.
 
-This MPG v1 cluster does not allow SQL CREATE DATABASE for the proxy user, and
-\`fly mpg databases create\` 404s until the cluster opts into the dashboard
-role system (Users tab) or you create the database in the UI.
+\`fly mpg databases list\` works (fly-db, fossall, …) but create 404s with the
+app deploy token. SQL CREATE DATABASE is denied for writer roles.
 
-One-time in the Fly dashboard:
-  https://fly.io/dashboard/${ORG}/managed_postgres/${CLUSTER}
-  1. Users tab: opt in to the new role system if prompted
-  2. Databases tab: create a database named ${DB_NAME}
-  3. Optional: Users tab → create user ${DB_NAME} with role writer
-  4. Re-run this script / the Earth MPG setup GitHub Action
+Either:
+  A) GitHub secret FLY_ORG_TOKEN from \`fly tokens create org\`, then re-run, or
+  B) One-time in the Fly dashboard:
+     https://fly.io/dashboard/${ORG}/managed_postgres/${CLUSTER}
+     Databases tab: create a database named ${DB_NAME}
+     Optional: Users tab → user ${DB_NAME}, role writer
+     Then re-run this script / Earth MPG setup workflow_dispatch
 
 Do not create a second MPG cluster. Do not fly mpg attach without
 --variable-name EARTH_DATABASE_URL.
