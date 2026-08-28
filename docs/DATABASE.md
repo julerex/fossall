@@ -58,8 +58,8 @@ Deep-time globe data lives in a **separate** database on the same cluster. Do **
 
 ```bash
 ./scripts/earth-mpg-setup.sh
-# Creates DB/user, applies db/earth/001_init.sql, then:
-# fly mpg attach q49ypo4wvmzr17ln -a fossall -d earth -u earth \
+# Applies db/earth/001_init.sql, then:
+# fly mpg attach q49ypo4wvmzr17ln -a fossall -d earth \
 #   --variable-name EARTH_DATABASE_URL
 
 # Local seed through the MPG proxy (URL is written to a file, never echoed):
@@ -69,6 +69,18 @@ export EARTH_DATABASE_URL="$(cat "${TMPDIR:-/tmp}/earth-database-url")"
 make seed-earth
 ```
 
-Do **not** `fly mpg attach` without `--variable-name` (default secret name is `DATABASE_URL`). Production setup is `.github/workflows/earth-mpg-setup.yml`. That workflow needs an **org-scoped** Fly token (`fly tokens create org`) as GitHub secret `FLY_ORG_TOKEN`. The deploy `FLY_API_TOKEN` can ship the app but cannot see MPG clusters. Sources, licenses, and API: [EARTH.md](EARTH.md).
+Do **not** `fly mpg attach` without `--variable-name` (default secret name is `DATABASE_URL`).
+
+### One-time: create database `earth`
+
+postgreputest is **MPG v1**. The cluster’s proxy user is not allowed `CREATE DATABASE`, and `fly mpg databases create` returns 404 until the cluster opts into the dashboard role system. Create the database once in the UI, then re-run setup (GitHub Action **Earth MPG setup** or `make earth-mpg-setup`):
+
+1. Open [postgreputest in the Fly dashboard](https://fly.io/dashboard/personal/managed_postgres/q49ypo4wvmzr17ln)
+2. **Users** tab: opt in to the new role system if the dashboard asks
+3. **Databases** tab: create a database named `earth`
+4. Optional: **Users** tab → user `earth`, role `writer`
+5. Re-run `.github/workflows/earth-mpg-setup.yml` (workflow_dispatch is fine)
+
+Do **not** create a second cluster. Sources, licenses, and API: [EARTH.md](EARTH.md).
 
 If `EARTH_DATABASE_URL` is unset, `/earth` still renders; `/api/earth/*` returns 503. `/health` never touches Postgres.

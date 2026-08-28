@@ -2,7 +2,8 @@
 # (without overwriting DATABASE_URL), and optionally seed CC-BY data.
 #
 # Prefers GitHub secret FLY_ORG_TOKEN (org-scoped). Falls back to FLY_API_TOKEN.
-# App deploy tokens cannot see MPG clusters. Never prints connection URLs.
+# Never prints connection URLs. Creating database `earth` on this MPG v1 cluster
+# needs a one-time Fly dashboard click (see docs/DATABASE.md); then re-run.
 name: Earth MPG setup
 
 on:

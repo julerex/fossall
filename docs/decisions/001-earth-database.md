@@ -37,5 +37,6 @@ Rejected for size on the shared cluster. Fossil-first (PBDB + Macrostrat + ICS) 
 
 ## Consequences
 - Operators must set `EARTH_DATABASE_URL` locally and as a Fly secret, separately from `DATABASE_URL`. Production uses `fly mpg attach --variable-name EARTH_DATABASE_URL` (`make earth-mpg-setup`).
+- On MPG v1 (postgreputest), creating the `earth` database itself is a one-time Fly dashboard action when `fly mpg databases create` 404s and the proxy role cannot `CREATE DATABASE`.
 - Seed jobs need network access to Macrostrat, PBDB, and GWS and can take a long time for the full PBDB dump.
 - Every public page must keep CC-BY citations visible.

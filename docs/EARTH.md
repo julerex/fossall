@@ -19,7 +19,7 @@ v1 does **not** ingest Catalogue of Life, GBIF occurrences, or Macrostrat map ti
 
 ## Database
 
-New database `earth` on cluster **postgreputest** (not a second cluster). Schema: [`db/earth/001_init.sql`](../db/earth/001_init.sql). App user `earth`. Connection: **`EARTH_DATABASE_URL`**. Attach with `--variable-name EARTH_DATABASE_URL` (`make earth-mpg-setup`); a default attach would overwrite the words `DATABASE_URL`.
+New database `earth` on cluster **postgreputest** (not a second cluster). Schema: [`db/earth/001_init.sql`](../db/earth/001_init.sql). App user `earth`. Connection: **`EARTH_DATABASE_URL`**. Attach with `--variable-name EARTH_DATABASE_URL` (`make earth-mpg-setup`); a default attach would overwrite the words `DATABASE_URL`. On this MPG v1 cluster, create database `earth` once in the Fly dashboard if `fly mpg databases create` 404s — see [DATABASE.md](DATABASE.md).
 
 Setup and seed: [DATABASE.md](DATABASE.md).
 
