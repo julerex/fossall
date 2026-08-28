@@ -34,23 +34,73 @@ trap 'rm -rf "$work"' EXIT
 
 ORG="${FLY_ORG:-}"
 if [ -z "$ORG" ] && command -v python3 >/dev/null 2>&1; then
-    if "$FLY" apps show "$APP" --json >"$work/app.json" 2>"$work/app.err"; then
-        ORG="$(python3 - "$work/app.json" <<'PY'
+    extract_org="$work/extract_org.py"
+    cat >"$extract_org" <<'PY'
 import json, sys
 from pathlib import Path
-data = json.loads(Path(sys.argv[1]).read_text())
-org = data.get("Organization") or data.get("organization") or {}
-slug = org.get("Slug") or org.get("slug") or org.get("RawSlug") or org.get("raw_slug") or ""
-print(slug)
+
+app = sys.argv[1]
+data = json.loads(Path(sys.argv[2]).read_text())
+
+def slug_from(org):
+    if isinstance(org, str) and org.strip():
+        return org.strip()
+    if isinstance(org, dict):
+        for k in ("Slug", "slug", "RawSlug", "raw_slug", "Name", "name"):
+            v = org.get(k)
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+    return ""
+
+def walk(obj):
+    if isinstance(obj, dict):
+        name = obj.get("Name") or obj.get("name") or obj.get("ID") or obj.get("id")
+        if name == app:
+            s = slug_from(obj.get("Organization") or obj.get("organization"))
+            if s:
+                return s
+        for v in obj.values():
+            s = walk(v)
+            if s:
+                return s
+    elif isinstance(obj, list):
+        for item in obj:
+            s = walk(item)
+            if s:
+                return s
+    return ""
+
+print(walk(data) or slug_from(
+    data.get("Organization") or data.get("organization") if isinstance(data, dict) else None
+))
 PY
-)"
+    for cmd in \
+        "$FLY apps list --json" \
+        "$FLY status -a $APP --json" \
+        "$FLY apps info -a $APP --json" \
+        "$FLY orgs list --json"
+    do
+        # shellcheck disable=SC2086
+        if eval "$cmd" >"$work/org.json" 2>"$work/org.err"; then
+            got="$(python3 "$extract_org" "$APP" "$work/org.json" 2>/dev/null || true)"
+            if [ -n "$got" ]; then
+                ORG="$got"
+                echo "Resolved Fly org $ORG via: $cmd"
+                break
+            fi
+        fi
+    done
+    if [ -z "$ORG" ]; then
+        echo "Could not resolve Fly org for app $APP (set FLY_ORG)." >&2
+        redact < "$work/org.err" >&2 || true
     fi
 fi
 if [ -n "$ORG" ]; then
-    echo "Using Fly org $ORG (from FLY_ORG or app $APP)."
+    echo "Using Fly org $ORG."
     set -- -o "$ORG"
 else
-    set --
+    echo "FLY_ORG is required in non-interactive runs (fly mpg needs --org)." >&2
+    exit 1
 fi
 
 # Prefer the live cluster named postgreputest over a hardcoded ID.
@@ -85,10 +135,8 @@ PY
             echo "fly mpg list did not include $CLUSTER_NAME; will try $CLUSTER." >&2
         fi
     else
-        echo "fly mpg list failed. App-scoped deploy tokens cannot manage MPG." >&2
+        echo "fly mpg list failed; will try documented cluster $CLUSTER." >&2
         redact < "$work/mpg.err" >&2
-        echo "Use an org token (fly tokens create org) as FLY_ORG_TOKEN, or run this script after fly auth login." >&2
-        exit 1
     fi
 fi
 
