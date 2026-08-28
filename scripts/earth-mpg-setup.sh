@@ -157,57 +157,38 @@ PY
     fi
 fi
 
-ok_or_exists() {
-    what="$1"
-    shift
-    if out="$("$@" 2>&1)"; then
-        echo "$what created."
-        return 0
-    fi
-    lowered=$(printf '%s' "$out" | tr '[:upper:]' '[:lower:]')
-    case "$lowered" in
-        *already*|*exist*|*duplicate*)
-            echo "$what already exists."
-            ;;
-        *)
-            printf '%s\n' "$out" | redact >&2
-            return 1
-            ;;
-    esac
+mpg_org() {
+    "$FLY" mpg -o "$ORG" "$@"
 }
 
-# Do not export FLY_ORG: flyctl would inject --org into create/users.
+# Also try org-prefixed control-plane paths (v1 clusters 404 on /postgresv2/:id/…).
 mpg_post() {
     path="$1"
     body="$2"
     auth="${FLY_API_TOKEN:-}"
     [ -n "$auth" ] || return 1
-    ids="$CLUSTER"
-    if [ -n "${MPGD_ID:-}" ]; then
-        ids="$MPGD_ID $CLUSTER"
-    fi
-    auths="Bearer ${auth}"
-    case "$auth" in
-        FlyV1\ *) ;;
-        *) auths="$auths
-FlyV1 ${auth}" ;;
-    esac
     i=0
-    printf '%s\n' $ids | while read -r cid; do
+    for cid in "$CLUSTER" ${MPGD_ID:-}; do
         [ -n "$cid" ] || continue
         for base in https://api.fly.io https://fly.io; do
             for pathpfx in postgresv2 postgres; do
-                printf '%s\n' "$auths" | while IFS= read -r ah; do
-                    i=$((i + 1))
-                    url="${base}/api/v1/${pathpfx}/${cid}${path}"
-                    code=$(curl -sS -o "$work/api.$i" -w '%{http_code}' \
-                        -X POST \
-                        -H "Authorization: ${ah}" \
-                        -H "Content-Type: application/json" \
-                        -d "$body" \
-                        "$url" || echo 000)
-                    echo "POST /api/v1/${pathpfx}/…${path} -> HTTP $code" >&2
-                    python3 - "$work/api.$i" <<'PY' 2>/dev/null || true
+                for orgpart in "" "organizations/${ORG}/"; do
+                    for authstyle in bearer flyv1; do
+                        i=$((i + 1))
+                        if [ "$authstyle" = flyv1 ]; then
+                            ah="FlyV1 ${auth#FlyV1 }"
+                        else
+                            ah="Bearer ${auth}"
+                        fi
+                        url="${base}/api/v1/${orgpart}${pathpfx}/${cid}${path}"
+                        code=$(curl -sS -o "$work/api.$i" -w '%{http_code}' \
+                            -X POST \
+                            -H "Authorization: ${ah}" \
+                            -H "Content-Type: application/json" \
+                            -d "$body" \
+                            "$url" || echo 000)
+                        echo "POST /api/v1/${orgpart}${pathpfx}/…${path} -> HTTP $code" >&2
+                        python3 - "$work/api.$i" <<'PY' 2>/dev/null || true
 import json, sys
 from pathlib import Path
 p = Path(sys.argv[1])
@@ -219,16 +200,20 @@ except Exception:
     raise SystemExit(0)
 if not isinstance(d, dict):
     raise SystemExit(0)
-if any(k.lower() == "password" for k in d.keys()) or "password" in json.dumps(d).lower():
+blob = json.dumps(d).lower()
+if "password" in blob:
     raise SystemExit(0)
-msg = d.get("error") or d.get("message") or (d.get("errors") or [None])[0]
+msg = d.get("error") or d.get("message")
+if not msg and isinstance(d.get("errors"), list) and d["errors"]:
+    msg = d["errors"][0]
 if msg:
     print(str(msg)[:200], file=sys.stderr)
 PY
-                    rm -f "$work/api.$i"
-                    case "$code" in
-                        200|201|204|409) exit 0 ;;
-                    esac
+                        rm -f "$work/api.$i"
+                        case "$code" in
+                            200|201|204|409) return 0 ;;
+                        esac
+                    done
                 done
             done
         done
@@ -237,25 +222,35 @@ PY
     return 1
 }
 
-if ok_or_exists "Database earth" mpg databases create "$CLUSTER" -n earth; then
-    :
+createdb_out="$work/createdb"
+if mpg_org connect "$CLUSTER" >"$createdb_out" 2>&1 <<'SQL'
+CREATE DATABASE earth;
+SQL
+then
+    echo "Database earth created via mpg connect."
+elif grep -qiE 'already exists' "$createdb_out"; then
+    echo "Database earth already exists."
 elif mpg_post "/databases" '{"name":"earth"}'; then
     echo "Database earth created via API."
 else
+    redact < "$createdb_out" >&2
     exit 1
 fi
 
-if ok_or_exists "User earth" mpg users create "$CLUSTER" -u earth -r writer; then
-    :
+if mpg_org users create "$CLUSTER" -u earth -r writer >"$work/user.out" 2>&1; then
+    echo "User earth created."
+elif grep -qiE 'already exists|duplicate' "$work/user.out"; then
+    echo "User earth already exists."
 elif mpg_post "/users" '{"user_name":"earth","role":"writer"}'; then
     echo "User earth created via API."
 else
-    exit 1
+    echo "No MPG user earth; attach will use the cluster default user." >&2
+    redact < "$work/user.out" >&2 || true
 fi
 
 echo "Applying schema to database earth…"
 sql_out="$work/sql"
-if ! mpg connect "$CLUSTER" -d earth < "$ROOT/db/earth/001_init.sql" >"$sql_out" 2>&1; then
+if ! mpg_org connect "$CLUSTER" -d earth < "$ROOT/db/earth/001_init.sql" >"$sql_out" 2>&1; then
     redact < "$sql_out" >&2
     exit 1
 fi
@@ -263,16 +258,19 @@ redact < "$sql_out"
 echo "Schema applied to database earth."
 
 attach_out="$work/attach"
-if mpg attach "$CLUSTER" -a "$APP" -d earth -u earth \
+if mpg_org attach "$CLUSTER" -a "$APP" -d earth -u earth \
     --variable-name EARTH_DATABASE_URL >"$attach_out" 2>&1; then
     echo "Attached database earth to $APP as EARTH_DATABASE_URL (URL not printed)."
+elif grep -qiE 'already has EARTH_DATABASE_URL' "$attach_out"; then
+    echo "EARTH_DATABASE_URL already set on $APP."
+elif mpg_org attach "$CLUSTER" -a "$APP" -d earth \
+    --variable-name EARTH_DATABASE_URL >"$attach_out" 2>&1; then
+    echo "Attached database earth (default user) as EARTH_DATABASE_URL (URL not printed)."
+elif grep -qiE 'already has EARTH_DATABASE_URL' "$attach_out"; then
+    echo "EARTH_DATABASE_URL already set on $APP."
 else
-    if grep -qiE 'already has EARTH_DATABASE_URL' "$attach_out"; then
-        echo "EARTH_DATABASE_URL already set on $APP."
-    else
-        redact < "$attach_out" >&2
-        exit 1
-    fi
+    redact < "$attach_out" >&2
+    exit 1
 fi
 
 echo "Next (local seed): fly mpg proxy $CLUSTER"
