@@ -147,14 +147,6 @@ PY
     fi
 fi
 
-mpg() {
-    if [ -n "$ORG" ]; then
-        "$FLY" mpg -o "$ORG" "$@"
-    else
-        "$FLY" mpg "$@"
-    fi
-}
-
 ok_or_exists() {
     what="$1"
     shift
