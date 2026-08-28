@@ -97,17 +97,15 @@ PY
 fi
 if [ -n "$ORG" ]; then
     echo "Using Fly org $ORG."
+    FLY_ORG="$ORG"
+    export FLY_ORG
 else
     echo "FLY_ORG is required in non-interactive runs (fly mpg needs --org)." >&2
     exit 1
 fi
 
 mpg() {
-    if [ -n "$ORG" ]; then
-        "$FLY" --org "$ORG" mpg "$@"
-    else
-        "$FLY" mpg "$@"
-    fi
+    "$FLY" mpg "$@"
 }
 
 # Prefer the live cluster named postgreputest over a hardcoded ID.
