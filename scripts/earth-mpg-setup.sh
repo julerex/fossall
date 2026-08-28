@@ -97,15 +97,22 @@ PY
 fi
 if [ -n "$ORG" ]; then
     echo "Using Fly org $ORG."
-    set -- -o "$ORG"
 else
     echo "FLY_ORG is required in non-interactive runs (fly mpg needs --org)." >&2
     exit 1
 fi
 
+mpg() {
+    if [ -n "$ORG" ]; then
+        "$FLY" --org "$ORG" mpg "$@"
+    else
+        "$FLY" mpg "$@"
+    fi
+}
+
 # Prefer the live cluster named postgreputest over a hardcoded ID.
 if command -v python3 >/dev/null 2>&1; then
-    if "$FLY" mpg "$@" list --json >"$work/mpg.json" 2>"$work/mpg.err"; then
+    if mpg list --json >"$work/mpg.json" 2>"$work/mpg.err"; then
         resolved="$(python3 - "$work/mpg.json" "$CLUSTER_NAME" "$CLUSTER" <<'PY'
 import json, sys
 from pathlib import Path
