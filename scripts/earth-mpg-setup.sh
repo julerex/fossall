@@ -239,34 +239,101 @@ PY
 }
 
 createdb_out="$work/createdb"
-# connect/attach do not accept -o; cluster id is enough if the token can see it.
-if mpg connect "$CLUSTER" >"$createdb_out" 2>&1 <<'SQL'
-CREATE DATABASE earth;
-SQL
-then
-    echo "Database earth created via mpg connect."
+printf '%s\n' 'CREATE DATABASE earth;' >"$work/createdb.sql"
+# Prefer a SQL file over a heredoc so flyctl cannot swallow stdin.
+if mpg connect "$CLUSTER" <"$work/createdb.sql" >"$createdb_out" 2>&1; then
+    echo "mpg connect CREATE DATABASE exit 0; output:"
+    redact < "$createdb_out"
 elif grep -qiE 'already exists' "$createdb_out"; then
     echo "Database earth already exists."
-elif mpg_post "/databases" '{"name":"earth"}'; then
-    echo "Database earth created via API."
 else
     echo "mpg connect CREATE DATABASE failed:" >&2
     redact < "$createdb_out" >&2
-    exit 1
+    # Keep going if status+proxy+psql can still create it.
 fi
 
-echo "Skipping MPG user earth (CLI/API cannot create it with this token); schema uses platform connect, attach uses the default cluster user."
-sleep 3
-
-echo "Applying schema to database earth…"
-sql_out="$work/sql"
-if ! mpg connect "$CLUSTER" -d earth < "$ROOT/db/earth/001_init.sql" >"$sql_out" 2>&1; then
-    echo "mpg connect -d earth failed:" >&2
-    redact < "$sql_out" >&2
-    exit 1
+admin_url_file="$work/admin.url"
+if mpg status "$CLUSTER" --json >"$work/status.json" 2>"$work/status.err"; then
+    python3 - "$work/status.json" "$admin_url_file" <<'PY'
+import json, sys, urllib.parse
+from pathlib import Path
+data = json.loads(Path(sys.argv[1]).read_text())
+creds = data.get("credentials") or {}
+user, password = creds.get("user") or "", creds.get("password") or ""
+uri = creds.get("pgbouncer_uri") or creds.get("ConnectionUri") or ""
+if not user or not password:
+    sys.stderr.write("status json missing credentials\n")
+    sys.exit(1)
+dbname = creds.get("dbname") or creds.get("DBName") or "postgres"
+if uri:
+    p = urllib.parse.urlparse(uri)
+    host = "127.0.0.1"
+    port = "16380"
+    netloc = f"{urllib.parse.quote(user, safe='')}:{urllib.parse.quote(password, safe='')}@{host}:{port}"
+    url = urllib.parse.urlunparse(("postgres", netloc, "/" + dbname, "", "", ""))
+else:
+    url = f"postgres://{urllib.parse.quote(user, safe='')}:{urllib.parse.quote(password, safe='')}@127.0.0.1:16380/{dbname}"
+Path(sys.argv[2]).write_text(url)
+Path(sys.argv[2]).chmod(0o600)
+PY
+    echo "Got cluster credentials via mpg status (not printed)."
+else
+    echo "mpg status --json failed:" >&2
+    redact < "$work/status.err" >&2
 fi
-redact < "$sql_out"
-echo "Schema applied to database earth."
+
+if [ -f "$admin_url_file" ]; then
+    mpg proxy "$CLUSTER" --bind-addr 127.0.0.1 --local-port 16380 >/dev/null 2>&1 &
+    proxy_pid=$!
+    sleep 2
+    export PGSSLMODE=prefer
+    export PGGSSENCMODE=disable
+    if command -v psql >/dev/null 2>&1; then
+        admin_url="$(cat "$admin_url_file")"
+        if psql "$admin_url" -v ON_ERROR_STOP=1 -c 'CREATE DATABASE earth;' >"$work/psql.createdb" 2>&1 \
+            || grep -qiE 'already exists' "$work/psql.createdb"; then
+            echo "Database earth ensured via psql on 127.0.0.1."
+        else
+            echo "psql CREATE DATABASE failed:" >&2
+            redact < "$work/psql.createdb" >&2
+        fi
+        echo "Applying schema to database earth via psql…"
+        ADMIN_URL="$admin_url"
+        export ADMIN_URL
+        earth_url="$(python3 - <<'PY'
+import os, urllib.parse
+u = urllib.parse.urlparse(os.environ["ADMIN_URL"])
+print(urllib.parse.urlunparse((u.scheme, u.netloc, "/earth", "", "", "")))
+PY
+)"
+        unset ADMIN_URL
+        if psql "$earth_url" -v ON_ERROR_STOP=1 -f "$ROOT/db/earth/001_init.sql" >"$work/sql" 2>&1; then
+            echo "Schema applied to database earth."
+        else
+            echo "psql schema apply failed:" >&2
+            redact < "$work/sql" >&2
+            kill "$proxy_pid" 2>/dev/null || true
+            exit 1
+        fi
+        unset ADMIN_URL admin_url earth_url
+        kill "$proxy_pid" 2>/dev/null || true
+    else
+        kill "$proxy_pid" 2>/dev/null || true
+        echo "psql not installed" >&2
+        exit 1
+    fi
+else
+    sleep 3
+    echo "Applying schema to database earth via mpg connect…"
+    sql_out="$work/sql"
+    if ! mpg connect "$CLUSTER" -d earth < "$ROOT/db/earth/001_init.sql" >"$sql_out" 2>&1; then
+        echo "mpg connect -d earth failed:" >&2
+        redact < "$sql_out" >&2
+        exit 1
+    fi
+    redact < "$sql_out"
+    echo "Schema applied to database earth."
+fi
 
 attach_out="$work/attach"
 if mpg attach "$CLUSTER" -a "$APP" -d earth \
