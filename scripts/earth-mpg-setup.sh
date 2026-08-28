@@ -141,6 +141,19 @@ PY
         if [ -n "$resolved" ]; then
             CLUSTER="$resolved"
             echo "Using MPG cluster $CLUSTER_NAME ($CLUSTER)."
+            python3 - "$work/mpg.json" "$CLUSTER_NAME" <<'PY' 2>/dev/null || true
+import json, sys
+from pathlib import Path
+raw = json.loads(Path(sys.argv[1]).read_text())
+want = sys.argv[2]
+rows = raw.get("data") if isinstance(raw, dict) else raw
+rows = rows or []
+for row in rows:
+    name = row.get("name") or row.get("Name") or ""
+    if name == want and isinstance(row, dict):
+        print("cluster json keys:", ", ".join(sorted(row.keys())))
+        break
+PY
             if [ -f "$work/cluster.env" ]; then
                 # shellcheck disable=SC1090
                 . "$work/cluster.env"
@@ -223,16 +236,25 @@ PY
 }
 
 createdb_out="$work/createdb"
-if mpg_org connect "$CLUSTER" >"$createdb_out" 2>&1 <<'SQL'
+# connect/attach do not accept -o; cluster id is enough if the token can see it.
+if mpg connect "$CLUSTER" >"$createdb_out" 2>&1 <<'SQL'
 CREATE DATABASE earth;
 SQL
 then
     echo "Database earth created via mpg connect."
 elif grep -qiE 'already exists' "$createdb_out"; then
     echo "Database earth already exists."
+elif mpg_org connect "$CLUSTER" >"$createdb_out" 2>&1 <<'SQL'
+CREATE DATABASE earth;
+SQL
+then
+    echo "Database earth created via mpg connect -o."
+elif grep -qiE 'already exists' "$createdb_out"; then
+    echo "Database earth already exists."
 elif mpg_post "/databases" '{"name":"earth"}'; then
     echo "Database earth created via API."
 else
+    echo "mpg connect without -o:" >&2
     redact < "$createdb_out" >&2
     exit 1
 fi
