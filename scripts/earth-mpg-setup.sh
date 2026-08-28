@@ -152,6 +152,9 @@ for row in rows:
     name = row.get("name") or row.get("Name") or ""
     if name == want and isinstance(row, dict):
         print("cluster json keys:", ", ".join(sorted(row.keys())))
+        print("cluster version:", row.get("version") or row.get("Version"))
+        mpgd = row.get("mpgd_cluster_id") or row.get("MpgdClusterId") or ""
+        print("mpgd_cluster_id set:" , "yes" if mpgd else "no")
         break
 PY
             if [ -f "$work/cluster.env" ]; then
@@ -244,35 +247,21 @@ then
     echo "Database earth created via mpg connect."
 elif grep -qiE 'already exists' "$createdb_out"; then
     echo "Database earth already exists."
-elif mpg_org connect "$CLUSTER" >"$createdb_out" 2>&1 <<'SQL'
-CREATE DATABASE earth;
-SQL
-then
-    echo "Database earth created via mpg connect -o."
-elif grep -qiE 'already exists' "$createdb_out"; then
-    echo "Database earth already exists."
 elif mpg_post "/databases" '{"name":"earth"}'; then
     echo "Database earth created via API."
 else
-    echo "mpg connect without -o:" >&2
+    echo "mpg connect CREATE DATABASE failed:" >&2
     redact < "$createdb_out" >&2
     exit 1
 fi
 
-if mpg_org users create "$CLUSTER" -u earth -r writer >"$work/user.out" 2>&1; then
-    echo "User earth created."
-elif grep -qiE 'already exists|duplicate' "$work/user.out"; then
-    echo "User earth already exists."
-elif mpg_post "/users" '{"user_name":"earth","role":"writer"}'; then
-    echo "User earth created via API."
-else
-    echo "No MPG user earth; attach will use the cluster default user." >&2
-    redact < "$work/user.out" >&2 || true
-fi
+echo "Skipping MPG user earth (CLI/API cannot create it with this token); schema uses platform connect, attach uses the default cluster user."
+sleep 3
 
 echo "Applying schema to database earth…"
 sql_out="$work/sql"
-if ! mpg_org connect "$CLUSTER" -d earth < "$ROOT/db/earth/001_init.sql" >"$sql_out" 2>&1; then
+if ! mpg connect "$CLUSTER" -d earth < "$ROOT/db/earth/001_init.sql" >"$sql_out" 2>&1; then
+    echo "mpg connect -d earth failed:" >&2
     redact < "$sql_out" >&2
     exit 1
 fi
@@ -280,14 +269,9 @@ redact < "$sql_out"
 echo "Schema applied to database earth."
 
 attach_out="$work/attach"
-if mpg_org attach "$CLUSTER" -a "$APP" -d earth -u earth \
+if mpg attach "$CLUSTER" -a "$APP" -d earth \
     --variable-name EARTH_DATABASE_URL >"$attach_out" 2>&1; then
-    echo "Attached database earth to $APP as EARTH_DATABASE_URL (URL not printed)."
-elif grep -qiE 'already has EARTH_DATABASE_URL' "$attach_out"; then
-    echo "EARTH_DATABASE_URL already set on $APP."
-elif mpg_org attach "$CLUSTER" -a "$APP" -d earth \
-    --variable-name EARTH_DATABASE_URL >"$attach_out" 2>&1; then
-    echo "Attached database earth (default user) as EARTH_DATABASE_URL (URL not printed)."
+    echo "Attached database earth as EARTH_DATABASE_URL (URL not printed)."
 elif grep -qiE 'already has EARTH_DATABASE_URL' "$attach_out"; then
     echo "EARTH_DATABASE_URL already set on $APP."
 else
