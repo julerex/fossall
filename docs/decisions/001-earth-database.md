@@ -12,7 +12,7 @@ Fossall already has a five-letter word list in database `fossall`, schema `words
 Paleogeographic maps that look like “what Earth looked like” are mostly copyrighted (Blakey, much of Scotese PaleoAtlas). Public-domain NASA Blue Marble is present-day satellite imagery and is the wrong picture for deep time. The Fly app is a 256 MB Machine and must not call heavy reconstruction services at request time.
 
 ## Decision
-1. Create a **second database named `earth`** on the existing **postgreputest** cluster (new user `earth`). Do not create a second MPG cluster. Do not `fly mpg attach` it; the app uses `EARTH_DATABASE_URL` so the words `DATABASE_URL` stays intact.
+1. Create a **second database named `earth`** on the existing **postgreputest** cluster (new user `earth`). Do not create a second MPG cluster. Attach with `fly mpg attach … --variable-name EARTH_DATABASE_URL` so the words `DATABASE_URL` stays intact.
 2. Store a highly normalized schema in `earth` (sources, time, taxa, collections, occurrences, lithology, stratigraphy, reconstructions). Geometries are JSONB GeoJSON so PostGIS is not required.
 3. Use **CC-BY** sources (ICS, Macrostrat, PBDB, GPlates/CAO2024) with on-page attribution, not copyrighted atlases and not a claim of public domain.
 4. Precompute CAO2024 coastline snapshots offline (`seed-earth recon`) every 10 Ma from 0–1800 Ma. Runtime only reads Postgres.
@@ -36,6 +36,7 @@ Rejected: anachronistic for deep time; large assets.
 Rejected for size on the shared cluster. Fossil-first (PBDB + Macrostrat + ICS) matches the education goal.
 
 ## Consequences
-- Operators must set `EARTH_DATABASE_URL` locally and as a Fly secret, separately from `DATABASE_URL`.
+- Operators must set `EARTH_DATABASE_URL` locally and as a Fly secret, separately from `DATABASE_URL`. Production uses `fly mpg attach --variable-name EARTH_DATABASE_URL` (`make earth-mpg-setup`).
+- On this MPG v1 cluster, `fly mpg databases create` 404s with the app deploy token; use GitHub secret `FLY_ORG_TOKEN` (`fly tokens create org`) or create database `earth` once in the Fly dashboard. The writer role cannot `CREATE DATABASE`.
 - Seed jobs need network access to Macrostrat, PBDB, and GWS and can take a long time for the full PBDB dump.
 - Every public page must keep CC-BY citations visible.
