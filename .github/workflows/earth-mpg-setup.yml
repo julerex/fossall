@@ -1,0 +1,119 @@
+# Create database `earth` on postgreputest, attach EARTH_DATABASE_URL
+# (without overwriting DATABASE_URL), and optionally seed CC-BY data.
+#
+# Uses the same FLY_API_TOKEN as deploy.yml. Never prints connection URLs.
+name: Earth MPG setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: Seed ICS/Macrostrat vocab, CAO2024 reconstructions, and a PBDB slice
+        type: boolean
+        default: true
+  push:
+    branches:
+      - cursor/earth-mpg-prod-d13e
+    paths:
+      - ".github/workflows/earth-mpg-setup.yml"
+      - "scripts/earth-mpg-setup.sh"
+      - "scripts/earth-mpg-local-url.sh"
+      - "db/earth/**"
+
+concurrency:
+  group: earth-mpg-setup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    name: Create earth DB and attach EARTH_DATABASE_URL
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create database, apply schema, attach secret
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          set +x
+          chmod +x scripts/earth-mpg-setup.sh
+          ./scripts/earth-mpg-setup.sh
+
+      - name: Confirm words DATABASE_URL is still set
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          set +x
+          list="$(flyctl secrets list -a fossall)"
+          echo "$list" | grep -q '^DATABASE_URL' || { echo "DATABASE_URL missing on fossall"; exit 1; }
+          echo "$list" | grep -q '^EARTH_DATABASE_URL' || { echo "EARTH_DATABASE_URL missing on fossall"; exit 1; }
+          echo "Both DATABASE_URL and EARTH_DATABASE_URL are present (values not printed)."
+
+  seed:
+    name: Seed earth vocab, reconstructions, fossils
+    needs: setup
+    if: github.event_name == 'push' || inputs.seed
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      MPG_CLUSTER: q49ypo4wvmzr17ln
+      EARTH_PROXY_PORT: "16380"
+      # Educational PBDB slice (full all_records dump is too large for a first run).
+      EARTH_RECON_STRIDE: "10"
+      EARTH_RECON_MAX_MA: "1800"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.92.0
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+          prefix-key: earth-mpg-seed
+
+      - name: Proxy MPG and seed
+        run: |
+          set +x
+          chmod +x scripts/earth-mpg-local-url.sh
+          flyctl mpg proxy "$MPG_CLUSTER" --bind-addr 127.0.0.1 --local-port "$EARTH_PROXY_PORT" &
+          proxy_pid=$!
+          trap 'kill "$proxy_pid" 2>/dev/null || true' EXIT
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if (echo >/dev/tcp/127.0.0.1/"$EARTH_PROXY_PORT") >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          ./scripts/earth-mpg-local-url.sh
+          export EARTH_DATABASE_URL="$(cat "${TMPDIR:-/tmp}/earth-database-url")"
+          make seed-earth-vocab
+          make seed-earth-recon
+          for clade in Trilobita Dinosauria Mammalia; do
+            echo "PBDB slice: $clade"
+            EARTH_PBDB_BASE_NAME="$clade" make seed-earth-pbdb
+          done
+
+      - name: Check public API is no longer 503
+        run: |
+          set +x
+          code="$(curl -sS -o /tmp/earth-timescale.json -w '%{http_code}' https://fossall.com/api/earth/timescale)"
+          echo "GET /api/earth/timescale → HTTP $code"
+          if [ "$code" != "200" ]; then
+            head -c 200 /tmp/earth-timescale.json; echo
+            exit 1
+          fi
+          python3 -c "import json; d=json.load(open('/tmp/earth-timescale.json')); assert isinstance(d, list) and len(d) > 0, d"
+          echo "timescale returned $(python3 -c "import json; print(len(json.load(open('/tmp/earth-timescale.json'))))") units"

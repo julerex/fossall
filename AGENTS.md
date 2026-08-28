@@ -21,13 +21,14 @@ Use the Makefile. It runs cargo as `env -u ARGV0 cargo` so Cursor/agent `ARGV0` 
 | `make build` | release server + wasm |
 | `make seed` | insert `data/five_letter_words.txt` (needs `DATABASE_URL`) |
 | `make seed-earth` | ICS + Macrostrat + PBDB + GPlates into database `earth` (`EARTH_DATABASE_URL`) |
+| `make earth-mpg-setup` | Create `earth` DB/user on postgreputest, apply schema, attach `EARTH_DATABASE_URL` |
 | `make deploy` | `fly deploy` |
 | `make fly-logs` | `fly logs --app fossall` |
 
 ## Fly.io (`fossall`)
 
 - Region **iad**. Two Machines: `shared-cpu-1x` / 256 MB. `auto_stop` / `auto_start`, **`min_machines_running = 0`**. That is why this app costs cents; do not raise the minimum or keep a machine started without saying so.
-- Shared IPv4 + dedicated IPv6 already allocated. **Do not** `fly ips allocate-v4` without `--shared` ($2/mo dedicated). No volumes. Postgres is the existing MPG cluster **postgreputest** (fra): database `fossall` / schema `words`, and database `earth` / schema `earth`. **Do not** create a new cluster. Do **not** `fly mpg attach` the earth database (it would overwrite `DATABASE_URL`). See [docs/DATABASE.md](docs/DATABASE.md) and [docs/EARTH.md](docs/EARTH.md). Never paste `fly mpg status --json`.
+- Shared IPv4 + dedicated IPv6 already allocated. **Do not** `fly ips allocate-v4` without `--shared` ($2/mo dedicated). No volumes. Postgres is the existing MPG cluster **postgreputest** (fra): database `fossall` / schema `words`, and database `earth` / schema `earth`. **Do not** create a new cluster. Attach earth with `--variable-name EARTH_DATABASE_URL` so words `DATABASE_URL` stays intact (`make earth-mpg-setup`). See [docs/DATABASE.md](docs/DATABASE.md) and [docs/EARTH.md](docs/EARTH.md). Never paste `fly mpg status --json`.
 - Certs already issued for `fossall.com` and `www.fossall.com`. Cloudflare DNS must stay **grey-cloud** (DNS only) so Fly can terminate TLS; see `docs/DOMAIN_SETUP.md`.
 - Deploy: `fly deploy`, or push to `main` with GitHub secret `FLY_API_TOKEN` (`.github/workflows/deploy.yml`).
 - `fly status` / `fly certs` can **auto-start** a stopped Machine. It will stop again; still avoid probing in a loop.

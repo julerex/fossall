@@ -45,7 +45,8 @@ make test
 make lint
 make fmt
 make seed         # insert data/five_letter_words.txt (requires DATABASE_URL)
-make seed-earth   # ICS/Macrostrat/PBDB/GPlates into database `earth` (EARTH_DATABASE_URL)
+make seed-earth        # ICS/Macrostrat/PBDB/GPlates into database `earth` (EARTH_DATABASE_URL)
+make earth-mpg-setup   # create earth DB on postgreputest and attach EARTH_DATABASE_URL
 ```
 
 ## Deploy (Fly.io)

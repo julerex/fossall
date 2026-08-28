@@ -19,7 +19,7 @@ v1 does **not** ingest Catalogue of Life, GBIF occurrences, or Macrostrat map ti
 
 ## Database
 
-New database `earth` on cluster **postgreputest** (not a second cluster). Schema: [`db/earth/001_init.sql`](../db/earth/001_init.sql). App user `earth`. Connection: **`EARTH_DATABASE_URL`**. Do **not** `fly mpg attach` this database (that would overwrite the words `DATABASE_URL`).
+New database `earth` on cluster **postgreputest** (not a second cluster). Schema: [`db/earth/001_init.sql`](../db/earth/001_init.sql). App user `earth`. Connection: **`EARTH_DATABASE_URL`**. Attach with `--variable-name EARTH_DATABASE_URL` (`make earth-mpg-setup`); a default attach would overwrite the words `DATABASE_URL`.
 
 Setup and seed: [DATABASE.md](DATABASE.md).
 
@@ -40,6 +40,8 @@ Dumps are gitignored under `data/earth/`. The seeder talks to Macrostrat, PBDB, 
 
 ```bash
 export EARTH_DATABASE_URL='postgres://…@localhost:16380/earth'
+# or, after `fly mpg proxy` and `./scripts/earth-mpg-local-url.sh`:
+# export EARTH_DATABASE_URL="$(cat "${TMPDIR:-/tmp}/earth-database-url")"
 make seed-earth              # vocab + pbdb + recon
 make seed-earth-vocab
 make seed-earth-pbdb
@@ -48,7 +50,7 @@ make seed-earth-recon
 
 Optional env: `EARTH_PBDB_BASE_NAME` (e.g. `Dinosauria` instead of all records), `EARTH_PBDB_MAX_TAXA` / `EARTH_PBDB_MAX_COLLS` / `EARTH_PBDB_MAX_OCCS`, `EARTH_RECON_STRIDE` (default 10 Ma), `EARTH_RECON_MAX_MA` (default 1800).
 
-A full PBDB ingest is hundreds of MB and many minutes. Reconstruction ingest is ~181 GWS requests (0–1800 Ma every 10 Ma) with simplified polygons.
+A full PBDB ingest is hundreds of MB and many minutes. Reconstruction ingest is ~181 GWS requests (0–1800 Ma every 10 Ma) with simplified polygons. The production GitHub Action seeds vocab, full reconstructions, and PBDB slices for Trilobita, Dinosauria, and Mammalia.
 
 ## UI
 
