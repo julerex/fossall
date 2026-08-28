@@ -97,10 +97,8 @@ PY
 fi
 if [ -n "$ORG" ]; then
     echo "Using Fly org $ORG."
-    FLY_ORG="$ORG"
-    export FLY_ORG
 else
-    echo "FLY_ORG is required in non-interactive runs (fly mpg needs --org)." >&2
+    echo "Org slug is required in non-interactive runs (set FLY_ORG or use fly apps list)." >&2
     exit 1
 fi
 
@@ -109,33 +107,47 @@ mpg() {
 }
 
 # Prefer the live cluster named postgreputest over a hardcoded ID.
+# Pass -o on `mpg list` only; FLY_ORG env injects --org into create/users.
 if command -v python3 >/dev/null 2>&1; then
-    if mpg list --json >"$work/mpg.json" 2>"$work/mpg.err"; then
-        resolved="$(python3 - "$work/mpg.json" "$CLUSTER_NAME" "$CLUSTER" <<'PY'
+    if "$FLY" mpg -o "$ORG" list --json >"$work/mpg.json" 2>"$work/mpg.err"; then
+        resolved="$(python3 - "$work/mpg.json" "$CLUSTER_NAME" "$CLUSTER" "$work/cluster.env" <<'PY'
 import json, sys
 from pathlib import Path
 raw = json.loads(Path(sys.argv[1]).read_text())
-want_name, fallback = sys.argv[2], sys.argv[3]
+want_name, fallback, out_path = sys.argv[2], sys.argv[3], sys.argv[4]
 if isinstance(raw, dict):
     rows = raw.get("data") or raw.get("clusters") or raw.get("Data") or []
 else:
     rows = raw
 rows = rows or []
-by_name = None
-by_id = None
+chosen = None
 for row in rows:
     cid = row.get("id") or row.get("Id") or row.get("ID") or ""
     name = row.get("name") or row.get("Name") or ""
-    if name == want_name:
-        by_name = cid
-    if cid == fallback:
-        by_id = cid
-print(by_name or by_id or "")
+    if name == want_name or cid == fallback:
+        chosen = row
+        if name == want_name:
+            break
+if not chosen:
+    print("")
+    raise SystemExit(0)
+cid = chosen.get("id") or chosen.get("Id") or chosen.get("ID") or ""
+mpgd = chosen.get("mpgd_cluster_id") or chosen.get("MpgdClusterId") or ""
+ver = chosen.get("version") or chosen.get("Version") or ""
+Path(out_path).write_text(f"CLUSTER_ID={cid}\nMPGD_ID={mpgd}\nCLUSTER_VERSION={ver}\n")
+print(cid)
 PY
 )"
         if [ -n "$resolved" ]; then
             CLUSTER="$resolved"
             echo "Using MPG cluster $CLUSTER_NAME ($CLUSTER)."
+            if [ -f "$work/cluster.env" ]; then
+                # shellcheck disable=SC1090
+                . "$work/cluster.env"
+                if [ -n "${MPGD_ID:-}" ]; then
+                    echo "MPGv2 id present."
+                fi
+            fi
         else
             echo "fly mpg list did not include $CLUSTER_NAME; will try $CLUSTER." >&2
         fi
@@ -164,34 +176,64 @@ ok_or_exists() {
     esac
 }
 
-# FLY_ORG makes flyctl inject --org into subcommands that do not accept it
-# (databases create / users create). List needed it; the rest use cluster id.
-unset FLY_ORG
-
+# Do not export FLY_ORG: flyctl would inject --org into create/users.
 mpg_post() {
     path="$1"
     body="$2"
     auth="${FLY_API_TOKEN:-}"
     [ -n "$auth" ] || return 1
+    ids="$CLUSTER"
+    if [ -n "${MPGD_ID:-}" ]; then
+        ids="$MPGD_ID $CLUSTER"
+    fi
+    auths="Bearer ${auth}"
+    case "$auth" in
+        FlyV1\ *) ;;
+        *) auths="$auths
+FlyV1 ${auth}" ;;
+    esac
     i=0
-    for url in \
-        "https://api.fly.io/api/v1/postgresv2/${CLUSTER}${path}" \
-        "https://fly.io/api/v1/postgresv2/${CLUSTER}${path}" \
-        "https://api.fly.io/api/v1/postgres/${CLUSTER}${path}"
-    do
-        i=$((i + 1))
-        code=$(curl -sS -o "$work/api.$i" -w '%{http_code}' \
-            -X POST \
-            -H "Authorization: Bearer ${auth}" \
-            -H "Content-Type: application/json" \
-            -d "$body" \
-            "$url" || echo 000)
-        rm -f "$work/api.$i"
-        case "$code" in
-            200|201|204|409) return 0 ;;
-        esac
+    printf '%s\n' $ids | while read -r cid; do
+        [ -n "$cid" ] || continue
+        for base in https://api.fly.io https://fly.io; do
+            for pathpfx in postgresv2 postgres; do
+                printf '%s\n' "$auths" | while IFS= read -r ah; do
+                    i=$((i + 1))
+                    url="${base}/api/v1/${pathpfx}/${cid}${path}"
+                    code=$(curl -sS -o "$work/api.$i" -w '%{http_code}' \
+                        -X POST \
+                        -H "Authorization: ${ah}" \
+                        -H "Content-Type: application/json" \
+                        -d "$body" \
+                        "$url" || echo 000)
+                    echo "POST /api/v1/${pathpfx}/…${path} -> HTTP $code" >&2
+                    python3 - "$work/api.$i" <<'PY' 2>/dev/null || true
+import json, sys
+from pathlib import Path
+p = Path(sys.argv[1])
+if not p.exists() or p.stat().st_size == 0:
+    raise SystemExit(0)
+try:
+    d = json.loads(p.read_text())
+except Exception:
+    raise SystemExit(0)
+if not isinstance(d, dict):
+    raise SystemExit(0)
+if any(k.lower() == "password" for k in d.keys()) or "password" in json.dumps(d).lower():
+    raise SystemExit(0)
+msg = d.get("error") or d.get("message") or (d.get("errors") or [None])[0]
+if msg:
+    print(str(msg)[:200], file=sys.stderr)
+PY
+                    rm -f "$work/api.$i"
+                    case "$code" in
+                        200|201|204|409) exit 0 ;;
+                    esac
+                done
+            done
+        done
     done
-    echo "MPG API POST ${path} failed (HTTP body not printed)." >&2
+    echo "MPG API POST ${path} failed." >&2
     return 1
 }
 
