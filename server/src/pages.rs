@@ -23,6 +23,11 @@ pub async fn home() -> impl IntoResponse {
                     }
                 }
                 p {
+                    a class="btn secondary" href="/earth" hx-boost="false" {
+                        "Watch continents move through deep time →"
+                    }
+                }
+                p {
                     a class="btn secondary" href="/homeprices" hx-boost="true" {
                         "Why home prices are high in 2026 →"
                     }
@@ -49,6 +54,13 @@ pub async fn home() -> impl IntoResponse {
                         "fully electric and fully self-driving, possible at a low cost? "
                         "The essay sketches constraints, solar yield, and a Tesla-scale "
                         "cost model — not a product brochure."
+                    }
+                }
+                article {
+                    h2 { "Earth through time" }
+                    p {
+                        "A Three.js globe of reconstructed continents from 1.8 billion years ago, "
+                        "with ICS time, fossil taxa, and rock vocabularies in Postgres."
                     }
                 }
                 article {

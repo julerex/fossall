@@ -462,6 +462,158 @@ main {
   }
 }
 
+/* ── Deep-time Earth globe ──────────────────────────────────────────── */
+
+body:has(.earth) main {
+  max-width: 72rem;
+}
+
+body:has(.earth) .site-header,
+body:has(.earth) .site-footer {
+  max-width: 72rem;
+}
+
+.earth .essay-header {
+  max-width: var(--max);
+}
+
+.earth-globe {
+  position: relative;
+  background: #07090c;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  min-height: 24rem;
+}
+
+.earth-globe canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.earth-globe canvas:active {
+  cursor: grabbing;
+}
+
+.earth-hud {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1fr minmax(12rem, 16rem);
+  font-family: var(--sans);
+  pointer-events: none;
+}
+
+.earth-hud > * {
+  pointer-events: auto;
+}
+
+.earth-time,
+.earth-search {
+  background: rgba(7, 9, 12, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  backdrop-filter: blur(8px);
+  color: #eeeae3;
+}
+
+.earth-time label,
+.earth-search label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #9ad9c4;
+  margin: 0 0 0.25rem;
+}
+
+.earth-time input[type="range"] {
+  width: 100%;
+  accent-color: #5dba9a;
+}
+
+.earth-time-readout {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.earth-search input[type="search"] {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: #eeeae3;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.3rem;
+}
+
+.earth-taxon-results {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.earth-taxon-results button {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: #eeeae3;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  padding: 0.3rem 0.2rem;
+  cursor: pointer;
+}
+
+.earth-taxon-results button:hover {
+  color: #7dceb2;
+}
+
+.earth-status {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: #b7c4bc;
+  pointer-events: none;
+}
+
+.earth-cite {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0.9rem 0 0;
+  max-width: 48rem;
+}
+
+@media (max-width: 40rem) {
+  .earth-globe {
+    aspect-ratio: 3 / 4;
+    min-height: 20rem;
+  }
+
+  .earth-hud {
+    grid-template-columns: 1fr;
+  }
+}
+
 .words {
   max-width: 52rem;
 }

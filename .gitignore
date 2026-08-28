@@ -8,3 +8,7 @@
 # Generated WASM (rebuild with `make build-wasm`)
 static/wasm/*
 !static/wasm/.gitkeep
+
+# Earth seed dumps (fetched at seed time)
+data/earth/*
+!data/earth/.gitkeep
