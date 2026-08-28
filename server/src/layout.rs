@@ -13,9 +13,9 @@ pub fn page(title: &str, body: Markup) -> Markup {
                 title { (title) " · Fossall" }
                 meta name="description" content="FOSS all the things — experiments in open, low-cost mobility and software.";
                 link rel="icon" href="/static/favicon.svg" type="image/svg+xml";
-                link rel="stylesheet" href="/static/css/style.css?v=3";
+                link rel="stylesheet" href="/static/css/style.css?v=5";
                 script src="/static/htmx.min.js" defer {}
-                // Import map for optional Three.js modules (3D sketch on /rv).
+                // Import map for optional Three.js modules (3D sketches on /rv and /earth).
                 script type="importmap" {
                     (maud::PreEscaped(r#"{
   "imports": {
@@ -31,6 +31,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
                     nav hx-boost="true" {
                         a href="/" { "Home" }
                         a href="/rv" { "Container EV-RV" }
+                        a href="/earth" hx-boost="false" { "Earth" }
                         a href="/homeprices" { "Home prices" }
                         a href="/words" { "Words" }
                     }

@@ -1,4 +1,4 @@
-//! Postgres pool and word-list queries.
+//! Postgres pools for the words list and the earth database.
 
 use std::time::Duration;
 
@@ -7,7 +7,16 @@ use sqlx::postgres::{PgPool, PgPoolOptions};
 /// Connect using `DATABASE_URL`. `Ok(None)` if the variable is unset so local
 /// essay pages still run without the proxy.
 pub async fn connect() -> anyhow::Result<Option<PgPool>> {
-    let Ok(url) = std::env::var("DATABASE_URL") else {
+    connect_env("DATABASE_URL").await
+}
+
+/// Connect using `EARTH_DATABASE_URL`. Independent of the words database.
+pub async fn connect_earth() -> anyhow::Result<Option<PgPool>> {
+    connect_env("EARTH_DATABASE_URL").await
+}
+
+async fn connect_env(var: &str) -> anyhow::Result<Option<PgPool>> {
+    let Ok(url) = std::env::var(var) else {
         return Ok(None);
     };
     let pool = PgPoolOptions::new()

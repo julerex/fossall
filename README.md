@@ -13,6 +13,7 @@ A small public site built almost entirely in Rust:
 Content:
 
 - `/rv` — feasibility sketch of a low-cost, fully electric, fully self-driving recreational vehicle about the size of a shipping container (interactive Three.js model, solar yield math, Tesla-scale cost estimate, and a comparison to U.S. house prices / apartment rents / Tesla-style leases)
+- `/earth` — Three.js globe of reconstructed continents from 1.8 billion years ago, with ICS time, Paleobiology Database fossils, and Macrostrat rock vocabularies in Postgres
 - `/homeprices` — why U.S. home prices are still high in July 2026, with a 30-year look at land vs building materials vs labor
 - `/words` — every five-letter string for a two-letter start; ENABLE words (public domain) highlighted from Postgres
 
@@ -28,11 +29,12 @@ cargo install wasm-bindgen-cli --version 0.2.120
 make dev
 # → http://localhost:8080/
 # → http://localhost:8080/rv
+# → http://localhost:8080/earth
 # → http://localhost:8080/homeprices
 # → http://localhost:8080/words   (503 unless DATABASE_URL is set)
 ```
 
-`/words` needs the Fly MPG proxy and `DATABASE_URL`. Other pages work without it. Setup, seed, and connection details: [docs/DATABASE.md](docs/DATABASE.md).
+`/words` needs the Fly MPG proxy and `DATABASE_URL`. `/earth` data APIs need `EARTH_DATABASE_URL` (see [docs/EARTH.md](docs/EARTH.md)). Other pages work without a database. Setup, seed, and connection details: [docs/DATABASE.md](docs/DATABASE.md).
 
 Other targets:
 
@@ -43,6 +45,7 @@ make test
 make lint
 make fmt
 make seed         # insert data/five_letter_words.txt (requires DATABASE_URL)
+make seed-earth   # ICS/Macrostrat/PBDB/GPlates into database `earth` (EARTH_DATABASE_URL)
 ```
 
 ## Deploy (Fly.io)
@@ -69,8 +72,9 @@ make fly-logs
 server/         Axum + maud pages
 client-wasm/    wasm-bindgen pack estimator
 static/         CSS, htmx, favicon, generated wasm/
-data/           ENABLE five-letter word list
-db/             Postgres schema
+data/           ENABLE word list; earth dumps are gitignored
+db/             Postgres schema (words + earth)
+docs/           Domain, database, earth sources, ADRs
 Dockerfile      multi-stage build
 fly.toml        Fly app config
 ```

@@ -44,3 +44,30 @@ make dev
 ```
 
 If `DATABASE_URL` is unset, the server still starts; `/words` returns 503 with an explanation. `/health` never touches Postgres.
+
+## Earth database (second database on the same cluster)
+
+Deep-time globe data lives in a **separate** database on the same cluster. Do **not** create a second cluster. Do **not** `fly mpg attach` this database (attach rewrites `DATABASE_URL` used by `/words`).
+
+| | |
+|---|---|
+| Database | `earth` |
+| Schema | `earth` |
+| App user | `earth` (MPG role `writer`) |
+| App env | `EARTH_DATABASE_URL` |
+
+```bash
+./scripts/earth-mpg-setup.sh
+# or:
+# fly mpg databases create q49ypo4wvmzr17ln -n earth
+# fly mpg users create q49ypo4wvmzr17ln -u earth -r writer
+# fly mpg connect q49ypo4wvmzr17ln -d earth < db/earth/001_init.sql
+
+fly mpg proxy q49ypo4wvmzr17ln
+export EARTH_DATABASE_URL='postgres://…@localhost:16380/earth'
+make seed-earth
+```
+
+Set `EARTH_DATABASE_URL` on the Fly app with `fly secrets set` (not attach). Sources, licenses, and API: [EARTH.md](EARTH.md).
+
+If `EARTH_DATABASE_URL` is unset, `/earth` still renders; `/api/earth/*` returns 503. `/health` never touches Postgres.

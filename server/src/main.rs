@@ -1,6 +1,8 @@
 //! Fossall web server — Axum + maud HTML, static HTMX/CSS/WASM assets.
 
 mod db;
+mod earth;
+mod earth_db;
 mod layout;
 mod pages;
 mod words;
@@ -12,6 +14,7 @@ use tower_http::services::ServeDir;
 #[derive(Clone)]
 pub struct AppState {
     db: Option<sqlx::PgPool>,
+    earth: Option<sqlx::PgPool>,
 }
 
 #[tokio::main]
@@ -25,6 +28,13 @@ async fn main() -> anyhow::Result<()> {
         tracing::info!("DATABASE_URL unset; /words will return 503");
     }
 
+    let earth = db::connect_earth().await?;
+    if earth.is_some() {
+        tracing::info!("earth postgres pool ready");
+    } else {
+        tracing::info!("EARTH_DATABASE_URL unset; /api/earth will return 503");
+    }
+
     let static_root = static_dir();
     tracing::info!(path = %static_root.display(), "static root");
 
@@ -33,10 +43,15 @@ async fn main() -> anyhow::Result<()> {
         .route("/rv", get(pages::rv_essay))
         .route("/homeprices", get(pages::homeprices))
         .route("/words", get(words::words))
+        .route("/earth", get(earth::page))
+        .route("/api/earth/timescale", get(earth::timescale))
+        .route("/api/earth/continents", get(earth::continents))
+        .route("/api/earth/taxa", get(earth::taxa))
+        .route("/api/earth/occurrences", get(earth::occurrences))
         .route("/health", get(pages::health))
         .nest_service("/static", ServeDir::new(&static_root))
         .nest_service("/wasm", ServeDir::new(static_root.join("wasm")))
-        .with_state(AppState { db });
+        .with_state(AppState { db, earth });
 
     let port: u16 = std::env::var("PORT")
         .unwrap_or_else(|_| "8080".to_string())

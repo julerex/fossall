@@ -1,4 +1,4 @@
-.PHONY: dev build build-wasm run lint fmt test seed deploy fly-logs
+.PHONY: dev build build-wasm run lint fmt test seed seed-earth seed-earth-vocab seed-earth-pbdb seed-earth-recon deploy fly-logs
 
 CARGO = env -u ARGV0 cargo
 WASM_BINDGEN ?= wasm-bindgen
@@ -14,7 +14,7 @@ build-wasm:
 		target/wasm32-unknown-unknown/release/fossall_wasm.wasm
 
 dev: build-wasm
-	$(CARGO) run -p fossall-server
+	$(CARGO) run -p fossall-server --bin fossall-server
 
 run: dev
 
@@ -34,6 +34,18 @@ test:
 
 seed:
 	$(CARGO) run -p fossall-server --bin seed
+
+seed-earth:
+	$(CARGO) run -p fossall-server --bin seed-earth
+
+seed-earth-vocab:
+	$(CARGO) run -p fossall-server --bin seed-earth -- vocab
+
+seed-earth-pbdb:
+	$(CARGO) run -p fossall-server --bin seed-earth -- pbdb
+
+seed-earth-recon:
+	$(CARGO) run -p fossall-server --bin seed-earth -- recon
 
 deploy:
 	fly deploy
