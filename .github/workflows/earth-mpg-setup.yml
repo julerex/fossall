@@ -48,8 +48,7 @@ jobs:
         run: |
           set +x
           flyctl auth whoami || true
-          flyctl apps list --json | python3 -c "import json,sys; d=json.load(sys.stdin); rows=d if isinstance(d,list) else [];
-[print(r.get('Name'), r.get('Organization')) for r in rows]" || true
+          flyctl apps list || true
 
       - name: Create database, apply schema, attach secret
         env:
@@ -73,7 +72,7 @@ jobs:
   seed:
     name: Seed earth vocab, reconstructions, fossils
     needs: setup
-    if: github.event_name == 'push' || inputs.seed
+    if: github.event_name == 'push' || github.event.inputs.seed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
