@@ -20,6 +20,7 @@ on:
       - "scripts/earth-mpg-setup.sh"
       - "scripts/earth-mpg-local-url.sh"
       - "db/earth/**"
+      - "docs/DATABASE.md"
 
 concurrency:
   group: earth-mpg-setup
