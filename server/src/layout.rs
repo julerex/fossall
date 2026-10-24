@@ -2,8 +2,20 @@
 
 use maud::{html, Markup, DOCTYPE};
 
+/// Allow 422 responses from `/demo` compose to swap error markup.
+const HTMX_DEMO_CONFIG: &str = r#"{"responseHandling":[{"code":"204","swap":false},{"code":"422","swap":true},{"code":"[23]..","swap":true},{"code":"[45]..","swap":false,"error":true}]}"#;
+
 /// Full HTML page with site chrome.
 pub fn page(title: &str, body: Markup) -> Markup {
+    shell(title, body, false)
+}
+
+/// `/demo` shell — vendors `_hyperscript` and enables 422 swaps.
+pub fn demo_page(title: &str, body: Markup) -> Markup {
+    shell(title, body, true)
+}
+
+fn shell(title: &str, body: Markup, hyperscript: bool) -> Markup {
     html! {
         (DOCTYPE)
         html lang="en" {
@@ -13,8 +25,14 @@ pub fn page(title: &str, body: Markup) -> Markup {
                 title { (title) " · Fossall" }
                 meta name="description" content="FOSS all the things — experiments in open, low-cost mobility and software.";
                 link rel="icon" href="/static/favicon.svg" type="image/svg+xml";
-                link rel="stylesheet" href="/static/css/style.css?v=5";
+                link rel="stylesheet" href="/static/css/style.css?v=6";
+                @if hyperscript {
+                    meta name="htmx-config" content=(HTMX_DEMO_CONFIG);
+                }
                 script src="/static/htmx.min.js" defer {}
+                @if hyperscript {
+                    script src="/static/_hyperscript.min.js" defer {}
+                }
                 // Import map for optional Three.js modules (3D sketches on /rv and /earth).
                 script type="importmap" {
                     (maud::PreEscaped(r#"{
@@ -34,6 +52,7 @@ pub fn page(title: &str, body: Markup) -> Markup {
                         a href="/earth" hx-boost="false" { "Earth" }
                         a href="/homeprices" { "Home prices" }
                         a href="/words" { "Words" }
+                        a href="/demo" hx-boost="false" { "Demo" }
                     }
                 }
                 main { (body) }

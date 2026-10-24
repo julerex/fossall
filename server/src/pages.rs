@@ -37,6 +37,11 @@ pub async fn home() -> impl IntoResponse {
                         "Explore five-letter strings →"
                     }
                 }
+                p {
+                    a class="btn secondary" href="/demo" hx-boost="false" {
+                        "Try the HTMX inbox →"
+                    }
+                }
             }
             section class="cards" {
                 article {
@@ -75,6 +80,13 @@ pub async fn home() -> impl IntoResponse {
                     p {
                         "Type two letters and see every five-letter string that starts with "
                         "them. Real ENABLE words, stored in Postgres, are highlighted."
+                    }
+                }
+                article {
+                    h2 { "HTMX inbox" }
+                    p {
+                        "A cookie-backed inbox that uses HTMX for server-rendered updates and "
+                        "_hyperscript for keys and the compose drawer."
                     }
                 }
             }
