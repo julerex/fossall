@@ -1,13 +1,17 @@
 //! Fossall web server — Axum + maud HTML, static HTMX/CSS/WASM assets.
 
 mod db;
+mod demo;
 mod earth;
 mod earth_db;
 mod layout;
 mod pages;
 mod words;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use std::path::PathBuf;
 use tower_http::services::ServeDir;
 
@@ -44,6 +48,11 @@ async fn main() -> anyhow::Result<()> {
         .route("/homeprices", get(pages::homeprices))
         .route("/words", get(words::words))
         .route("/earth", get(earth::page))
+        .route("/demo", get(demo::page))
+        .route("/demo/list", get(demo::list))
+        .route("/demo/messages", post(demo::create))
+        .route("/demo/messages/{id}", get(demo::open).delete(demo::archive))
+        .route("/demo/messages/{id}/restore", post(demo::restore))
         .route("/api/earth/timescale", get(earth::timescale))
         .route("/api/earth/continents", get(earth::continents))
         .route("/api/earth/taxa", get(earth::taxa))

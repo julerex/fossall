@@ -5,7 +5,7 @@
 A small public site built almost entirely in Rust:
 
 - **Axum** server, HTML via **maud**
-- **HTMX** for navigation (vendored, no SPA framework)
+- **HTMX** for navigation (vendored, no SPA framework); `_hyperscript` on the `/demo` inbox
 - **Rust WASM** for the interactive battery-pack estimator on the essay page
 - **sqlx** + Fly.io Managed Postgres for the five-letter word list
 - Deployed on **Fly.io** at [fossall.com](https://fossall.com)
@@ -16,6 +16,7 @@ Content:
 - `/earth` — Three.js globe of reconstructed continents from 1.8 billion years ago, with ICS time, Paleobiology Database fossils, and Macrostrat rock vocabularies in Postgres
 - `/homeprices` — why U.S. home prices are still high in July 2026, with a 30-year look at land vs building materials vs labor
 - `/words` — every five-letter string for a two-letter start; ENABLE words (public domain) highlighted from Postgres
+- `/demo` — HTMX and `_hyperscript` inbox toy (cookie-backed, no database)
 
 ## Local development
 
@@ -32,6 +33,7 @@ make dev
 # → http://localhost:8080/earth
 # → http://localhost:8080/homeprices
 # → http://localhost:8080/words   (503 unless DATABASE_URL is set)
+# → http://localhost:8080/demo
 ```
 
 `/words` needs the Fly MPG proxy and `DATABASE_URL`. `/earth` data APIs need `EARTH_DATABASE_URL` (see [docs/EARTH.md](docs/EARTH.md)). Other pages work without a database. Setup, seed, and connection details: [docs/DATABASE.md](docs/DATABASE.md).

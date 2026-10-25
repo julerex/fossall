@@ -4,7 +4,7 @@ Public Rust site at [fossall.com](https://fossall.com). Product and content: [RE
 
 ## Stack
 
-Cargo workspace (`resolver = "2"`): `server` (Axum + maud + sqlx) and `client-wasm` (wasm-bindgen). HTMX is vendored at `static/htmx.min.js` — no SPA framework.
+Cargo workspace (`resolver = "2"`): `server` (Axum + maud + sqlx) and `client-wasm` (wasm-bindgen). HTMX is vendored at `static/htmx.min.js` — no SPA framework. `_hyperscript` is vendored at `static/_hyperscript.min.js` and loaded only on `/demo`.
 
 `static/wasm/` is gitignored. Local runs need `make build-wasm` first (`make dev` does this). **wasm-bindgen-cli 0.2.120** must match the crate in `Cargo.lock`; the Dockerfile pins the same version.
 
@@ -34,6 +34,6 @@ Use the Makefile. It runs cargo as `env -u ARGV0 cargo` so Cursor/agent `ARGV0` 
 
 ## Conventions
 
-- Pages live in `server/src/pages.rs`, `server/src/words.rs`, `server/src/earth.rs`, and `server/src/layout.rs`. Match existing maud + HTMX patterns; do not add a JS framework. `/earth` uses the same CDN Three.js import map as `/rv`. `/health` must not query Postgres.
+- Pages live in `server/src/pages.rs`, `server/src/words.rs`, `server/src/earth.rs`, `server/src/demo.rs`, and `server/src/layout.rs`. Match existing maud + HTMX patterns; do not add a JS framework. `/earth` uses the same CDN Three.js import map as `/rv`. `/demo` loads `_hyperscript` from the demo shell. `/health` must not query Postgres.
 - After `client-wasm` changes, rebuild WASM before claiming the UI works.
 - Run `make lint` and `make test` before finishing code changes.
