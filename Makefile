@@ -1,4 +1,4 @@
-.PHONY: dev build build-wasm run lint fmt test seed seed-earth seed-earth-vocab seed-earth-pbdb seed-earth-recon deploy fly-logs
+.PHONY: dev build build-wasm run lint fmt test seed seed-earth seed-earth-vocab seed-earth-pbdb seed-earth-recon earth-mpg-setup deploy fly-logs
 
 CARGO = env -u ARGV0 cargo
 WASM_BINDGEN ?= wasm-bindgen
@@ -46,6 +46,9 @@ seed-earth-pbdb:
 
 seed-earth-recon:
 	$(CARGO) run -p fossall-server --bin seed-earth -- recon
+
+earth-mpg-setup:
+	./scripts/earth-mpg-setup.sh
 
 deploy:
 	fly deploy
