@@ -1038,6 +1038,214 @@ body:has(.demo-inbox) .site-footer {
   }
 }
 
+/* ── Simulated shop ─────────────────────────────────────────────────── */
+
+.shop-banner {
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--fg);
+  background: var(--widget);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0.35rem;
+}
+
+.shop-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--sans);
+}
+
+.shop-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.shop-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.85rem;
+}
+
+.shop-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--widget);
+}
+
+.shop-handle {
+  font-weight: 600;
+}
+
+.shop-unconfigured {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.shop-logout,
+.shop-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.shop-logout .btn,
+.shop-qty .btn,
+.shop-line .btn,
+.shop form .btn {
+  margin-top: 0;
+  cursor: pointer;
+  border: 0;
+}
+
+.shop-logout .btn.secondary,
+.shop-qty .btn.secondary,
+.shop-line .btn.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+.shop-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.shop-card {
+  display: block;
+  height: 100%;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.shop-card:hover {
+  border-color: var(--accent);
+}
+
+.shop-card h2 {
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  margin: 0.75rem 0 0.4rem;
+}
+
+.shop-card p {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.shop-price {
+  font-family: var(--sans);
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.shop-art {
+  height: 7.5rem;
+  border-radius: 0.35rem;
+  background: var(--widget);
+}
+
+.shop-art-sticker-sheet {
+  background: linear-gradient(135deg, #0b5f4a, #7dceb2);
+}
+
+.shop-art-rv-poster {
+  background: linear-gradient(135deg, #1d3557, #a8dadc);
+}
+
+.shop-art-globe-print {
+  background: linear-gradient(135deg, #3d2b1f, #c4a574);
+}
+
+.shop-art-five-letter-chart {
+  background: linear-gradient(135deg, #094d3c, #b7e4c7);
+}
+
+.shop-art-solar-pamphlet {
+  background: linear-gradient(135deg, #7a5410, #f2cc8f);
+}
+
+.shop-art-supporter-pin {
+  background: radial-gradient(circle at 40% 40%, #f4e3c1, #0b5f4a 70%);
+}
+
+.shop-product .shop-art {
+  max-width: 22rem;
+  height: 10rem;
+  margin-bottom: 1rem;
+}
+
+.shop-lines,
+.shop-orders {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+}
+
+.shop-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.shop-muted {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.shop-qty input[type="number"] {
+  width: 4.5rem;
+  margin-left: 0.25rem;
+  padding: 0.35rem 0.45rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+}
+
+.shop-total {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.shop-orders a {
+  display: block;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+}
+
 .site-footer {
   max-width: 52rem;
   margin: 0 auto;
@@ -1096,5 +1304,13 @@ body:has(.demo-inbox) .site-footer {
   .word-table td.word-real {
     background: var(--accent);
     color: #0a1210;
+  }
+
+  .shop-art-sticker-sheet {
+    background: linear-gradient(135deg, #094d3c, #5dba9a);
+  }
+
+  .shop-art-rv-poster {
+    background: linear-gradient(135deg, #1d3557, #5dba9a);
   }
 }

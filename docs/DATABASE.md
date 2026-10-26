@@ -5,8 +5,8 @@ Fossall reads five-letter English words from Fly.io Managed Postgres cluster **p
 | | |
 |---|---|
 | Database | `fossall` |
-| Schema | `words` |
-| Table | `words.five_letter_words` |
+| Schema | `words` (five-letter list) and `shop` (simulated store) |
+| Table | `words.five_letter_words`; shop tables in [SHOP.md](SHOP.md) |
 | App user | `fossall` (MPG role `writer`) |
 
 Do **not** create a second MPG cluster, add a Fly volume, allocate a dedicated IPv4, or raise `min_machines_running`. Do **not** paste `fly mpg status --json` (it prints credentials) into chat, commits, or issues.
@@ -21,6 +21,7 @@ fly mpg users create q49ypo4wvmzr17ln -u fossall -r writer
 
 # Schema (psql via platform auth — no URL in the shell history)
 fly mpg connect q49ypo4wvmzr17ln -d fossall < db/001_init.sql
+fly mpg connect q49ypo4wvmzr17ln -d fossall < db/002_shop.sql
 
 # Seed. Proxy first, then set DATABASE_URL to the fossall database
 # on localhost (pooled or direct). Never commit the URL.
@@ -43,7 +44,7 @@ make dev
 # http://localhost:8080/words
 ```
 
-If `DATABASE_URL` is unset, the server still starts; `/words` returns 503 with an explanation. `/health` never touches Postgres.
+If `DATABASE_URL` is unset, the server still starts; `/words` and `/shop` return 503 with an explanation. `/health` never touches Postgres. Simulated shop setup: [SHOP.md](SHOP.md).
 
 ## Earth database (second database on the same cluster)
 

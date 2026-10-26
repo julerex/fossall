@@ -27,13 +27,13 @@ Use the Makefile. It runs cargo as `env -u ARGV0 cargo` so Cursor/agent `ARGV0` 
 ## Fly.io (`fossall`)
 
 - Region **iad**. Two Machines: `shared-cpu-1x` / 256 MB. `auto_stop` / `auto_start`, **`min_machines_running = 0`**. That is why this app costs cents; do not raise the minimum or keep a machine started without saying so.
-- Shared IPv4 + dedicated IPv6 already allocated. **Do not** `fly ips allocate-v4` without `--shared` ($2/mo dedicated). No volumes. Postgres is the existing MPG cluster **postgreputest** (fra): database `fossall` / schema `words`, and database `earth` / schema `earth`. **Do not** create a new cluster. Do **not** `fly mpg attach` the earth database (it would overwrite `DATABASE_URL`). See [docs/DATABASE.md](docs/DATABASE.md) and [docs/EARTH.md](docs/EARTH.md). Never paste `fly mpg status --json`.
+- Shared IPv4 + dedicated IPv6 already allocated. **Do not** `fly ips allocate-v4` without `--shared` ($2/mo dedicated). No volumes. Postgres is the existing MPG cluster **postgreputest** (fra): database `fossall` / schemas `words` and `shop`, and database `earth` / schema `earth`. **Do not** create a new cluster. Do **not** `fly mpg attach` the earth database (it would overwrite `DATABASE_URL`). See [docs/DATABASE.md](docs/DATABASE.md), [docs/SHOP.md](docs/SHOP.md), and [docs/EARTH.md](docs/EARTH.md). Never paste `fly mpg status --json`.
 - Certs already issued for `fossall.com` and `www.fossall.com`. Cloudflare DNS must stay **grey-cloud** (DNS only) so Fly can terminate TLS; see `docs/DOMAIN_SETUP.md`.
 - Deploy: `fly deploy`, or push to `main` with GitHub secret `FLY_API_TOKEN` (`.github/workflows/deploy.yml`).
 - `fly status` / `fly certs` can **auto-start** a stopped Machine. It will stop again; still avoid probing in a loop.
 
 ## Conventions
 
-- Pages live in `server/src/pages.rs`, `server/src/words.rs`, `server/src/earth.rs`, `server/src/demo.rs`, and `server/src/layout.rs`. Match existing maud + HTMX patterns; do not add a JS framework. `/earth` uses the same CDN Three.js import map as `/rv`. `/demo` loads `_hyperscript` from the demo shell. `/health` must not query Postgres.
+- Pages live in `server/src/pages.rs`, `server/src/words.rs`, `server/src/earth.rs`, `server/src/shop.rs`, `server/src/auth.rs`, `server/src/demo.rs`, and `server/src/layout.rs`. Match existing maud + HTMX patterns; do not add a JS framework. `/earth` uses the same CDN Three.js import map as `/rv`. `/demo` loads `_hyperscript` from the demo shell. `/shop` uses schema `shop` on database `fossall` and X login only. `/health` must not query Postgres.
 - After `client-wasm` changes, rebuild WASM before claiming the UI works.
 - Run `make lint` and `make test` before finishing code changes.

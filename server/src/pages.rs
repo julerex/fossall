@@ -38,6 +38,11 @@ pub async fn home() -> impl IntoResponse {
                     }
                 }
                 p {
+                    a class="btn secondary" href="/shop" hx-boost="true" {
+                        "Browse the simulated shop →"
+                    }
+                }
+                p {
                     a class="btn secondary" href="/demo" hx-boost="false" {
                         "Try the HTMX inbox →"
                     }
@@ -80,6 +85,13 @@ pub async fn home() -> impl IntoResponse {
                     p {
                         "Type two letters and see every five-letter string that starts with "
                         "them. Real ENABLE words, stored in Postgres, are highlighted."
+                    }
+                }
+                article {
+                    h2 { "Simulated shop" }
+                    p {
+                        "A fake storefront of Fossall merch. Sign in only with an X account. "
+                        "Checkout writes a receipt. Nothing is charged or shipped."
                     }
                 }
                 article {

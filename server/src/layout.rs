@@ -25,7 +25,7 @@ fn shell(title: &str, body: Markup, hyperscript: bool) -> Markup {
                 title { (title) " · Fossall" }
                 meta name="description" content="FOSS all the things — experiments in open, low-cost mobility and software.";
                 link rel="icon" href="/static/favicon.svg" type="image/svg+xml";
-                link rel="stylesheet" href="/static/css/style.css?v=6";
+                link rel="stylesheet" href="/static/css/style.css?v=7";
                 @if hyperscript {
                     meta name="htmx-config" content=(HTMX_DEMO_CONFIG);
                 }
@@ -52,6 +52,7 @@ fn shell(title: &str, body: Markup, hyperscript: bool) -> Markup {
                         a href="/earth" hx-boost="false" { "Earth" }
                         a href="/homeprices" { "Home prices" }
                         a href="/words" { "Words" }
+                        a href="/shop" { "Shop" }
                         a href="/demo" hx-boost="false" { "Demo" }
                     }
                 }
